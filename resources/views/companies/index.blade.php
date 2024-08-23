@@ -7,6 +7,15 @@
                 {{ session('status') }}
             </div>
         @endif
+        @if ($errors->any())
+            <div class="bg-red-500 text-white p-4 rounded-lg">
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
         <!-- Formulár na pridanie novej firmy -->
         <div class="flex justify-center mb-4 space-x-2">
             <!-- Tlačidlo pre Firmy -->

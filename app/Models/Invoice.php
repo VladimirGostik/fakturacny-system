@@ -45,4 +45,5 @@ class Invoice extends Model
     {
         return $this->hasMany(InvoiceService::class);
     }
+    
 }

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class InvoiceService extends Model
 {
     use HasFactory;
+    protected $table = 'invoice_services'; // Použitie množného čísla
 
     protected $fillable = [
         'invoice_id',
