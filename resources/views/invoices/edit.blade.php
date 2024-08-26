@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-6xl mx-auto space-y-6">
+<div class="max-w-4xl mx-auto space-y-6">
     @if (session('status'))
         <div class="bg-green-500 text-white p-4 rounded-lg">
             {{ session('status') }}
@@ -25,12 +25,12 @@
 
         <!-- Invoice Number and Billing Month -->
         <div class="grid grid-cols-2 gap-4 mt-6">
-            <div class="mt-6">
+            <div>
                 <x-input-label for="invoice_number" :value="__('Číslo faktúry')" class="text-lg" />
                 <x-text-input id="invoice_number" name="invoice_number" type="text" class="mt-1 block w-full" value="{{ $invoice->invoice_number }}" required />
             </div>
 
-            <div class="mt-6">
+            <div>
                 <x-input-label for="billing_month" :value="__('Mesiac fakturácie')" class="text-lg" />
                 <select id="billing_month" name="billing_month" class="mt-1 block w-full" required>
                     @for ($i = 1; $i <= 12; $i++)
@@ -76,7 +76,7 @@
             </div>
         </div>
 
-        <!-- Residential Company Info -->
+        <!-- Residential Company Info (Always Visible) -->
         <div class="grid grid-cols-2 gap-4 mt-6">
             <div>
                 <x-input-label for="residential_company_name" :value="__('Názov bytového podniku')" class="text-lg" />
@@ -96,6 +96,31 @@
             <div>
                 <x-input-label for="residential_company_postal_code" :value="__('PSČ')" class="text-lg" />
                 <x-text-input id="residential_company_postal_code" name="residential_company_postal_code" type="text" class="mt-1 block w-full" value="{{ $invoice->residential_company_postal_code }}" required />
+            </div>
+
+            <div>
+                <x-input-label for="residential_company_ico" :value="__('IČO')" class="text-lg" />
+                <x-text-input id="residential_company_ico" name="residential_company_ico" type="text" class="mt-1 block w-full" value="{{ $invoice->residential_company_ico }}" />
+            </div>
+
+            <div>
+                <x-input-label for="residential_company_dic" :value="__('DIČ')" class="text-lg" />
+                <x-text-input id="residential_company_dic" name="residential_company_dic" type="text" class="mt-1 block w-full" value="{{ $invoice->residential_company_dic }}" />
+            </div>
+
+            <div>
+                <x-input-label for="residential_company_ic_dph" :value="__('IČ DPH')" class="text-lg" />
+                <x-text-input id="residential_company_ic_dph" name="residential_company_ic_dph" type="text" class="mt-1 block w-full" value="{{ $invoice->residential_company_ic_dph }}" />
+            </div>
+
+            <div>
+                <x-input-label for="residential_company_iban" :value="__('IBAN')" class="text-lg" />
+                <x-text-input id="residential_company_iban" name="residential_company_iban" type="text" class="mt-1 block w-full" value="{{ $invoice->residential_company_iban }}" />
+            </div>
+
+            <div>
+                <x-input-label for="residential_company_bank_connection" :value="__('Bankové spojenie')" class="text-lg" />
+                <x-text-input id="residential_company_bank_connection" name="residential_company_bank_connection" type="text" class="mt-1 block w-full" value="{{ $invoice->residential_company_bank_connection }}" />
             </div>
         </div>
 
@@ -127,7 +152,7 @@
         <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-6">{{ __('Služby') }}</h2>
         <div id="services_section" class="mt-4">
             @foreach($invoice->services as $index => $service)
-            <div class="grid grid-cols-3 gap-4">
+            <div class="grid grid-cols-3 gap-4 service-row" data-index="{{ $index }}">
                 <div>
                     <x-input-label for="service_description_{{ $index }}" :value="'Popis služby'" class="text-lg" />
                     <x-text-input id="service_description_{{ $index }}" name="services[{{ $index }}][description]" type="text" class="mt-1 block w-full" value="{{ $service->service_description }}" />
@@ -136,6 +161,10 @@
                 <div>
                     <x-input-label for="service_price_{{ $index }}" :value="'Cena služby'" class="text-lg" />
                     <x-text-input id="service_price_{{ $index }}" name="services[{{ $index }}][price]" type="number" step="0.01" class="mt-1 block w-full" value="{{ $service->service_price }}" />
+                </div>
+
+                <div class="flex items-end">
+                    <button type="button" class="bg-red-500 text-white py-2 px-4 rounded remove-service">{{ __('Vymazať službu') }}</button>
                 </div>
             </div>
             @endforeach
@@ -154,12 +183,54 @@
 </div>
 
 <script>
+    let companies = @json($companies);
+    let residentialCompanies = @json($residential_companies);
+    let places = @json($places);
+
+    document.getElementById('company_id').addEventListener('change', function() {
+        let selectedCompanyId = this.value;
+        let residentialSelect = document.getElementById('residential_company_id');
+        
+        residentialSelect.innerHTML = '<option value="">{{ __("Vyberte bytový podnik") }}</option>';
+        
+        if (selectedCompanyId) {
+            residentialCompanies.forEach(function(company) {
+                if (company.company_id == selectedCompanyId) {
+                    let option = document.createElement('option');
+                    option.value = company.id;
+                    option.text = company.name;
+                    residentialSelect.add(option);
+                }
+            });
+        }
+    });
+
+    document.getElementById('residential_company_id').addEventListener('change', function() {
+        let selectedResidentialId = this.value;
+
+        if (selectedResidentialId) {
+            residentialCompanies.forEach(function(company) {
+                if (company.id == selectedResidentialId) {
+                    document.getElementById('residential_company_name').value = company.name;
+                    document.getElementById('residential_company_address').value = company.address;
+                    document.getElementById('residential_company_city').value = company.city;
+                    document.getElementById('residential_company_postal_code').value = company.postal_code;
+                    document.getElementById('residential_company_ico').value = company.ico;
+                    document.getElementById('residential_company_dic').value = company.dic;
+                    document.getElementById('residential_company_ic_dph').value = company.ic_dph;
+                    document.getElementById('residential_company_iban').value = company.iban;
+                    document.getElementById('residential_company_bank_connection').value = company.bank_connection;
+                }
+            });
+        }
+    });
+
     document.getElementById('add_service').addEventListener('click', function () {
         let servicesSection = document.getElementById('services_section');
         let index = servicesSection.children.length;
 
         let newService = `
-            <div class="grid grid-cols-3 gap-4 mt-4">
+            <div class="grid grid-cols-3 gap-4 mt-4 service-row" data-index="${index}">
                 <div>
                     <x-input-label for="service_description_${index}" :value="'Popis služby'" class="text-lg" />
                     <x-text-input id="service_description_${index}" name="services[${index}][description]" type="text" class="mt-1 block w-full" />
@@ -169,10 +240,22 @@
                     <x-input-label for="service_price_${index}" :value="'Cena služby'" class="text-lg" />
                     <x-text-input id="service_price_${index}" name="services[${index}][price]" type="number" step="0.01" class="mt-1 block w-full" />
                 </div>
+
+                <div class="flex items-end">
+                    <button type="button" class="bg-red-500 text-white py-2 px-4 rounded remove-service">{{ __('Vymazať službu') }}</button>
+                </div>
             </div>
         `;
 
         servicesSection.insertAdjacentHTML('beforeend', newService);
+    });
+
+    // Event delegation for remove buttons
+    document.getElementById('services_section').addEventListener('click', function(event) {
+        if (event.target && event.target.classList.contains('remove-service')) {
+            let serviceRow = event.target.closest('.service-row');
+            serviceRow.remove();
+        }
     });
 </script>
 

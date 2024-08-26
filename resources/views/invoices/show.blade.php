@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-6xl mx-auto space-y-8">
+<div class="max-w-4xl mx-auto space-y-8">
     <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100 text-center">{{ __('Detaily faktúry') }}</h1>
 
     <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg p-8">
@@ -75,10 +75,10 @@
 
         <!-- Tlačidlo späť -->
         <!-- Tlačidlo na úpravu faktúry -->
-        <div class="mt-6 flex justify-between">
-            <a href="{{ route('invoices.edit', $invoice) }}" class="bg-yellow-500 text-white py-2 px-4 rounded hover:bg-yellow-600">{{ __('Upraviť faktúru') }}</a>
-            <a href="{{ route('invoices.index') }}" class="bg-blue-500 text-white py-2 px-4 rounded">{{ __('Späť na faktúry') }}</a>
-        </div>
+    <div class="mt-6 flex justify-between">
+        <a href="{{ route('invoices.edit', $invoice) }}" class="bg-yellow-500 text-white py-2 px-4 rounded hover:bg-yellow-600">{{ __('Upraviť faktúru') }}</a>
+        <a href="{{ route('invoices.index') }}" class="bg-blue-500 text-white py-2 px-4 rounded">{{ __('Späť na faktúry') }}</a>
+    </div>
 
     </div>
 </div>

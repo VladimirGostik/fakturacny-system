@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="max-w-6xl mx-auto space-y-6">
+    <div class="max-w-4xl mx-auto space-y-6">
         @if (session('status'))
             <div class="bg-green-500 text-white p-4 rounded-lg">
                 {{ session('status') }}

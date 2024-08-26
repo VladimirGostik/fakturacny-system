@@ -18,7 +18,7 @@
                         {{ __('Firmy/Odoberatelia') }}
                     </x-nav-link>
 
-                    <x-nav-link :href="route('exports.index')" :active="request()->routeIs('exports.index')">
+                    <x-nav-link :href="route('export.index')" :active="request()->routeIs('export.index')">
                         {{ __('Export faktúr') }}
                     </x-nav-link>
                 </div>
@@ -85,7 +85,7 @@
                 {{ __('Firmy/Bytové podniky') }}
             </x-responsive-nav-link>
 
-            <x-responsive-nav-link :href="route('exports.index')" :active="request()->routeIs('exports.index')">
+            <x-responsive-nav-link :href="route('export.index')" :active="request()->routeIs('export.index')">
                 {{ __('Export faktúr') }}
             </x-responsive-nav-link>
         </div>

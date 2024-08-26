@@ -18,14 +18,16 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-
+    Route::post('/invoices/bulk-action', [InvoiceController::class, 'bulkAction'])->name('invoices.bulk_action');
     Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
     Route::get('/invoices/create', [InvoiceController::class, 'create'])->name('invoices.create');
     Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
     Route::get('/invoices/{invoice}/edit', [InvoiceController::class, 'edit'])->name('invoices.edit');
     Route::put('/invoices/{invoice}', [InvoiceController::class, 'update'])->name('invoices.update');
-    Route::delete('/invoices/{invoice}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
     Route::post('/invoices', [InvoiceController::class, 'store'])->name('invoices.store');
+    Route::post('/invoices/generate-monthly', [InvoiceController::class, 'generateMonthlyInvoices'])->name('invoices.generate_monthly');
+    Route::get('/invoices/{invoice}/download', [InvoiceController::class, 'downloadPDF'])->name('invoices.download_pdf');
+    Route::delete('/invoices/{invoice}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
 
     Route::get('/companies', [CompanyController::class, 'index'])->name('companies.index');
     Route::post('/companies', [CompanyController::class, 'store'])->name('companies.store');
@@ -41,12 +43,12 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('places', PlaceController::class)->middleware('auth');
 
-
     Route::post('/services/{place_id}', [ServiceController::class, 'store'])->name('services.store');
     Route::resource('services', ServiceController::class);
 
+    Route::get('/export', [ExportController::class, 'index'])->name('export.index');
+    //Route::get('/export/company/{companyId}', [ExportController::class, 'getCompanyStatistics']);
 
-        Route::get('/exports', [ExportController::class, 'index'])->name('exports.index');
 });
 
 require __DIR__.'/auth.php';

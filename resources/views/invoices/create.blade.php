@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-6xl mx-auto space-y-6">
+<div class="max-w-4xl mx-auto space-y-6">
     @if (session('status'))
     <div class="bg-green-500 text-white p-4 rounded-lg">
             {{ session('status') }}
@@ -16,6 +16,34 @@
             </ul>
         </div>
     @endif
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">{{ __('Generovanie mesačných faktúr') }}</h2>
+    
+    <form method="POST" action="{{ route('invoices.generate_monthly') }}">
+        @csrf
+        <div class="grid grid-cols-3 gap-4 mt-6">
+            <div>
+                <x-input-label for="issue_date" :value="__('Dátum vytvorenia faktúr')" class="text-lg" />
+                <x-text-input id="issue_date" name="issue_date" type="date" class="mt-1 block w-full" required />
+            </div>
+            <div>
+                <x-input-label for="due_date" :value="__('Dátum splatnosti faktúr')" class="text-lg" />
+                <x-text-input id="due_date" name="due_date" type="date" class="mt-1 block w-full" required />
+            </div>
+            <div>
+                <x-input-label for="billing_month" :value="__('Mesiac fakturácie')" class="text-lg" />
+                <select id="billing_month" name="billing_month" class="mt-1 block w-full" required>
+                    @for ($i = 1; $i <= 12; $i++)
+                        <option value="{{ $i }}">{{ __('Mesiac') }} {{ $i }}</option>
+                    @endfor
+                </select>
+            </div>
+        </div>
+
+        <div class="mt-6">
+            <x-primary-button>{{ __('Generovať mesačné faktúry') }}</x-primary-button>
+        </div>
+    </form>
+
     <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">{{ __('Vytvoriť novú faktúru') }}</h1>
 
     <form method="POST" action="{{ route('invoices.store') }}">
