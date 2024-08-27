@@ -20,15 +20,29 @@
         </div>
     @endif
 
-    <!-- Dropdown to filter by company -->
-    <div class="mb-4">
-        <x-input-label for="company_filter" :value="__('Vyberte firmu')" />
-        <select id="company_filter" name="company_filter" class="mt-1 block w-full">
-            <option value="">{{ __('Všetky firmy') }}</option>
-            @foreach($companies as $company)
-                <option value="{{ $company->id }}">{{ $company->name }}</option>
-            @endforeach
-        </select>
+    <!-- Dropdown to filter by company and residential company -->
+    <div class="mb-4 flex space-x-4">
+        <!-- Company Filter -->
+        <div class="flex-grow">
+            <x-input-label for="company_filter" :value="__('Vyberte firmu')" />
+            <select id="company_filter" name="company_filter" class="mt-1 block w-full">
+                <option value="">{{ __('Všetky firmy') }}</option>
+                @foreach($companies as $company)
+                    <option value="{{ $company->id }}">{{ $company->name }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <!-- Residential Company Filter -->
+        <div class="flex-grow">
+            <x-input-label for="residential_company_filter" :value="__('Vyberte bytový podnik')" />
+            <select id="residential_company_filter" name="residential_company_filter" class="mt-1 block w-full">
+                <option value="">{{ __('Všetky bytové podniky') }}</option>
+                @foreach($residentialCompanies as $residentialCompany)
+                    <option value="{{ $residentialCompany->id }}">{{ $residentialCompany->name }}</option>
+                @endforeach
+            </select>
+        </div>
     </div>
 
     <!-- State Filter Buttons -->
@@ -65,19 +79,21 @@
                         <th class="px-4 py-2">{{ __('Firma') }}</th>
                         <th class="px-4 py-2">{{ __('Bytový podnik') }}</th>
                         <th class="px-4 py-2">{{ __('Miesto') }}</th>
+                        <th class="px-4 py-2">{{ __('Dátum vytvorenia') }}</th>
                         <th class="px-4 py-2">{{ __('Suma faktúry') }}</th>
                         <th class="px-4 py-2">{{ __('Akcie') }}</th>
                     </tr>
                 </thead>
                 <tbody id="invoice-list">
                     @foreach($invoices as $invoice)
-                    <tr class="hover:bg-gray-100 dark:hover:bg-gray-700" data-company="{{ $invoice->company_id }}" data-state="{{ $invoice->status }}">
+                    <tr class="hover:bg-gray-100 dark:hover:bg-gray-700" data-company="{{ $invoice->company_id }}" data-residential="{{ $invoice->residential_company_id }}" data-state="{{ $invoice->status }}">
                         <td class="px-4 py-2">
                             <input type="checkbox" name="selected_invoices[]" value="{{ $invoice->id }}" class="invoice-checkbox hidden">
                         </td>
                         <td class="px-4 py-2">{{ $invoice->company->name }}</td>
                         <td class="px-4 py-2">{{ $invoice->residential_company_name }}</td>
                         <td class="px-4 py-2 place-column">{{ $invoice->services->first()->place_name ?? 'N/A' }}</td>
+                        <td class="px-4 py-2">{{ $invoice->issue_date }}</td>
                         <td class="px-4 py-2">{{ number_format($invoice->services->sum('service_price'), 2, ',', ' ') }} €</td>
                         <td class="px-4 py-2">
                             <a href="{{ route('invoices.show', $invoice->id) }}" class="text-blue-500">{{ __('Zobraziť') }}</a> |
@@ -91,15 +107,28 @@
             <!-- Bulk Action Buttons -->
             <div class="mt-4 space-x-4 text-center">
                 <button type="button" onclick="setBulkAction('mark_sent')" class="bg-green-500 text-white py-2 px-4 rounded hidden" id="mark-sent">{{ __('Označiť ako odoslané') }}</button>
-                <button type="button" onclick="setBulkAction('mark_paid')" class="bg-yellow-500 text-white py-2 px-4 rounded hidden" id="mark-paid">{{ __('Označiť ako zaplatené') }}</button>
+                <button type="button" onclick="openPaymentDateModal()" class="bg-yellow-500 text-white py-2 px-4 rounded hidden" id="mark-paid">{{ __('Označiť ako zaplatené') }}</button>
                 <button type="button" onclick="setBulkAction('delete_selected')" class="bg-red-500 text-white py-2 px-4 rounded hidden" id="delete-selected">{{ __('Vymazať označené') }}</button>
                 <button type="button" onclick="setBulkAction('download_selected')" class="bg-blue-500 text-white py-2 px-4 rounded hidden" id="download-selected">{{ __('Stiahnuť označené') }}</button>
+            </div>
+            
+            <!-- Payment Date Modal -->
+            <div id="payment-date-modal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+                <div class="bg-white p-6 rounded-lg shadow-lg w-96">
+                    <h2 class="text-xl font-bold mb-4">{{ __('Vyberte dátum zaplatenia') }}</h2>
+                    <label for="payment_date" class="block text-sm font-medium text-gray-700">{{ __('Dátum zaplatenia') }}</label>
+                    <input type="date" id="modal-payment-date" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                    <div class="mt-6 flex justify-end space-x-4">
+                        <button type="button" onclick="closePaymentDateModal()" class="bg-gray-500 text-white py-2 px-4 rounded">{{ __('Zrušiť') }}</button>
+                        <button type="button" onclick="confirmPaymentDate()" class="bg-blue-500 text-white py-2 px-4 rounded">{{ __('Uložiť') }}</button>
+                    </div>
+                </div>
             </div>
         </form>
     </div>
 </div>
 
-<!-- JavaScript for search and toggle functionality -->
+<!-- JavaScript for search, toggle, and filter functionality -->
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -155,23 +184,32 @@
         // Company Filter Dropdown
         document.getElementById('company_filter').addEventListener('change', function() {
             let selectedCompany = this.value;
-            document.querySelectorAll('#invoice-list tr').forEach(row => {
-                if (selectedCompany === '' || row.getAttribute('data-company') == selectedCompany) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
+            filterInvoices(currentState, searchBox.value.toLowerCase());
         });
 
-        // Filtering function that respects both state and search term
+        // Residential Company Filter Dropdown
+        document.getElementById('residential_company_filter').addEventListener('change', function() {
+            filterInvoices(currentState, searchBox.value.toLowerCase());
+        });
+
+        // Filtering function that respects both state, search term, and filters
         function filterInvoices(state, searchTerm = '') {
+            const selectedCompany = document.getElementById('company_filter').value;
+            const selectedResidentialCompany = document.getElementById('residential_company_filter').value;
+
             document.querySelectorAll('#invoice-list tr').forEach(row => {
                 const placeColumn = row.querySelector('.place-column').textContent.toLowerCase();
                 const rowState = row.getAttribute('data-state');
+                const rowCompany = row.getAttribute('data-company');
+                const rowResidential = row.getAttribute('data-residential');
 
-                // Show the row only if it matches the current state and search term
-                if (rowState === state && placeColumn.includes(searchTerm)) {
+                // Show the row only if it matches the current state, search term, and filters
+                const matchesState = rowState === state;
+                const matchesSearch = placeColumn.includes(searchTerm);
+                const matchesCompany = !selectedCompany || rowCompany === selectedCompany;
+                const matchesResidential = !selectedResidentialCompany || rowResidential === selectedResidentialCompany;
+
+                if (matchesState && matchesSearch && matchesCompany && matchesResidential) {
                     row.style.display = '';
                 } else {
                     row.style.display = 'none';
@@ -193,7 +231,7 @@
         }
 
         // Set bulk action based on selected invoices
-        function setBulkAction(action) {
+        window.setBulkAction = function(action) {
             document.getElementById('bulk-action-input').value = action;
 
             let selectedInvoices = [];
@@ -201,13 +239,58 @@
                 selectedInvoices.push(checkbox.value);
             });
 
-            document.getElementById('selected_invoices_input').value = JSON.stringify(selectedInvoices);
-            let activeFilter = document.querySelector('.state-filter-button.bg-blue-700').getAttribute('data-state');
-            document.getElementById('filter-input').value = activeFilter;
+            if (selectedInvoices.length > 0) {
+                document.getElementById('selected_invoices_input').value = JSON.stringify(selectedInvoices);
 
+                if (action === 'mark_paid') {
+                    // Open the payment date modal instead of submitting the form immediately
+                    openPaymentDateModal();
+                } else {
+                    // Submit form for other actions
+                    document.getElementById('bulk-action-form').submit();
+                }
+            } else {
+                alert('{{ __("Please select at least one invoice.") }}');
+            }
+        }
+
+        // Open the Payment Date Modal
+        window.openPaymentDateModal = function() {
+            document.getElementById('payment-date-modal').classList.remove('hidden');
+        }
+
+        // Confirm and Set Payment Date, then submit the form
+        window.confirmPaymentDate = function() {
+            let paymentDate = document.getElementById('modal-payment-date').value;
+            
+            // Set the bulk action to 'mark_paid'
+            document.getElementById('bulk-action-input').value = 'mark_paid';
+            
+            // Ensure that selected invoices are correctly populated
+            let selectedInvoices = [];
+            document.querySelectorAll('#invoice-list .invoice-checkbox:checked').forEach(function (checkbox) {
+                selectedInvoices.push(checkbox.value);
+            });
+            
+            // Set the selected invoices list
+            document.getElementById('selected_invoices_input').value = JSON.stringify(selectedInvoices);
+            
+            // Create a hidden input field for the payment date and append it to the form
+            let paymentDateInput = document.createElement('input');
+            paymentDateInput.type = 'hidden';
+            paymentDateInput.name = 'payment_date';
+            paymentDateInput.value = paymentDate;
+            document.getElementById('bulk-action-form').appendChild(paymentDateInput);
+            
+            // Now submit the form
             document.getElementById('bulk-action-form').submit();
         }
-    });
 
+
+        // Close Payment Date Modal
+        window.closePaymentDateModal = function() {
+            document.getElementById('payment-date-modal').classList.add('hidden');
+        }
+    });
 </script>
 @endsection

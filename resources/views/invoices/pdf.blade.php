@@ -13,8 +13,8 @@
         }
         .container {
             width: 100%;
-            max-width: 850px; /* Adjust the width if needed */
-            margin: 0 auto; /* Center the container */
+            max-width: 850px;
+            margin: 0 auto;
             padding: 0 10px;
         }
         .header {
@@ -50,16 +50,16 @@
             color: #555;
         }
         .invoice-details {
-            width: 100%; /* or set a specific width like 600px */
-            margin: 15px auto; /* This centers the element horizontally */
+            width: 100%;
+            margin: 15px auto;
             background-color: #2f5597c0;
             border-radius: 8px;
-            text-align: center; /* Centers the text inside the box */
+            text-align: center;
         }
 
         .invoice-details strong span {
             display: inline-block;
-            margin: 0 15px; /* Adds horizontal space between the spans */
+            margin: 0 15px;
         }
 
         .payment-details {
@@ -115,6 +115,29 @@
             font-size: 12px;
             color: #777;
             border-top: 1px solid #ddd;
+        }
+        .signature-section {
+            width: 100%;
+            display: inline-block;
+            vertical-align: top;
+        }
+
+        .signature-section div {
+            margin-top: 100px;
+            width: 49%;
+            display: inline-block;
+            vertical-align: top;
+        }
+        .signature-right {
+            text-align: right;
+        }
+        .signature-line {
+            margin-top: 40px;
+            border-top: 1px solid #333;
+            padding-top: 5px;
+            width: 80%;
+            margin-left: auto;
+            margin-right: auto;
         }
     </style>
 </head>
@@ -207,6 +230,18 @@
         <!-- Total -->
         <div class="total-section">
             <h2>{{ __('Celková cena:') }} {{ number_format($invoice->services->sum('service_price'), 2) }} €</h2>
+        </div>
+
+        <!-- Signature Section -->
+        <div class="signature-section">
+            <div class="signature-left">
+                <p>{{ __('Vyhotovil:') }} <strong>{{ $user->name }}</strong></p>
+                <div class="signature-line">{{ __('Podpis') }}</div>
+            </div>
+            <div class="signature-right">
+                <p>{{ __('Prevzal:') }}</p>
+                <div class="signature-line">{{ __('Podpis') }}</div>
+            </div>
         </div>
 
         <!-- Footer -->

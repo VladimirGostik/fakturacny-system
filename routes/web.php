@@ -25,6 +25,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/invoices/{invoice}/edit', [InvoiceController::class, 'edit'])->name('invoices.edit');
     Route::put('/invoices/{invoice}', [InvoiceController::class, 'update'])->name('invoices.update');
     Route::post('/invoices', [InvoiceController::class, 'store'])->name('invoices.store');
+    Route::post('/invoices/mark_paid_with_date', [InvoiceController::class, 'markPaidWithDate'])->name('invoices.mark_paid_with_date');
     Route::post('/invoices/generate-monthly', [InvoiceController::class, 'generateMonthlyInvoices'])->name('invoices.generate_monthly');
     Route::get('/invoices/{invoice}/download', [InvoiceController::class, 'downloadPDF'])->name('invoices.download_pdf');
     Route::delete('/invoices/{invoice}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
@@ -47,6 +48,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('services', ServiceController::class);
 
     Route::get('/export', [ExportController::class, 'index'])->name('export.index');
+    Route::get('/export/download-statistics', [ExportController::class, 'downloadStatistics'])->name('export.download_statistics');
+
     //Route::get('/export/company/{companyId}', [ExportController::class, 'getCompanyStatistics']);
 
 });

@@ -11,6 +11,7 @@ use App\Models\ResidentialCompany;
 use App\Models\Place;
 use App\Models\Service;
 use PDF;
+ini_set('memory_limit', '512M');  // Adjust as needed
 
 
 class InvoiceController extends Controller
@@ -20,11 +21,12 @@ class InvoiceController extends Controller
     {
         // Načítanie všetkých faktúr z databázy
         $filter = $request->query('filter', 'created'); // Predvolene zobrazíme "vytvorené" faktúry, ak nie je filter nastavený
+        $residentialCompanies = ResidentialCompany::all();
         $companies = Company::all();
         $invoices = Invoice::all();
 
         // Návrat pohľadu s faktúrami
-        return view('invoices.index', compact('invoices','companies','filter'));
+        return view('invoices.index', compact('invoices','companies','filter','residentialCompanies'));
     }
 
     public function create()
@@ -190,8 +192,6 @@ public function generateMonthlyInvoices(Request $request)
     $issueDate = $request->input('issue_date');
     $dueDate = $request->input('due_date');
     $billingMonth = $request->input('billing_month');
-    $lastInvoice = Invoice::orderBy('invoice_number', 'desc')->first();
-    $newInvoiceNumber = $lastInvoice ? $lastInvoice->invoice_number + 1 : 1;
 
     // Získanie všetkých bytových podnikov s miestami a službami
     $residentialCompanies = ResidentialCompany::with('places.services', 'company')->get();
@@ -218,9 +218,12 @@ public function generateMonthlyInvoices(Request $request)
                 continue;
             }
 
+            // Get the latest invoice number and ensure it's unique
+            $newInvoiceNumber = $this->getNextInvoiceNumber();
+
             // Generovanie faktúry a priradenie služieb
             $invoice = Invoice::create([
-                'invoice_number' => $newInvoiceNumber++,  // Inkrementujte číslo faktúry
+                'invoice_number' => $newInvoiceNumber,  // Inkrementujte číslo faktúry
                 'company_id' => $company->id,  // Použite správne company_id
                 'residential_company_id' => $residentialCompany->id,
                 'residential_company_name' => $residentialCompany->name,
@@ -248,18 +251,30 @@ public function generateMonthlyInvoices(Request $request)
     return redirect()->route('invoices.index')->with('status', 'Mesačné faktúry boli úspešne vygenerované a uložené.');
 }
 
+private function getNextInvoiceNumber()
+{
+    $lastInvoice = Invoice::orderBy('invoice_number', 'desc')->first();
+    $newInvoiceNumber = $lastInvoice ? $lastInvoice->invoice_number + 1 : 1;
+
+    // Ensure the invoice number is unique
+    while (Invoice::where('invoice_number', $newInvoiceNumber)->exists()) {
+        $newInvoiceNumber++;
+    }
+
+    return $newInvoiceNumber;
+}
+
 
 
 public function downloadSelectedInvoices(array $selectedInvoices)
 {
-    $zip = new ZipArchive;
 
-    // Assume all invoices are for the same company and billing month
+    $zip = new ZipArchive;
+    $user = auth()->user();
     $firstInvoice = Invoice::find($selectedInvoices[0]);
     $companyName = str_replace(' ', '_', $firstInvoice->company->name);
     $billingMonth = $firstInvoice->billing_month;
 
-    // Set the ZIP file name as company_name_billing_month.zip
     $zipFileName = $companyName . '_mesiac_' . $billingMonth . '.zip';
     $zipFilePath = storage_path($zipFileName);
 
@@ -267,7 +282,7 @@ public function downloadSelectedInvoices(array $selectedInvoices)
         foreach ($selectedInvoices as $invoiceId) {
             $invoice = Invoice::find($invoiceId);
 
-            $pdf = PDF::loadView('invoices.pdf', compact('invoice'));
+            $pdf = PDF::loadView('invoices.pdf', compact('invoice', 'user'));
             $pdfContent = $pdf->output();
             
             // Set the name of individual invoices within the ZIP archive
@@ -287,11 +302,14 @@ public function downloadSelectedInvoices(array $selectedInvoices)
 }
 
 
+
+
     public function bulkAction(Request $request)
     {
         $action = $request->input('bulk_action');
         $selectedInvoices = json_decode($request->input('selected_invoices_list'), true);
         $filter = $request->input('filter'); 
+        //dd($request->all());
 
         if ($selectedInvoices && is_array($selectedInvoices)) {
             if ($action == 'mark_sent') {
@@ -311,8 +329,23 @@ public function downloadSelectedInvoices(array $selectedInvoices)
                 return redirect()->route('invoices.index', ['filter' => $filter])->with('status', 'Faktúry boli označené ako odoslané.');
 
             } elseif ($action == 'mark_paid') {
-                Invoice::whereIn('id', $selectedInvoices)->update(['status' => 'paid']);
-                return redirect()->route('invoices.index', ['filter' => $filter])->with('status', 'Faktúry boli označené ako zaplatené.');
+                $paymentDate = $request->input('payment_date');
+                if (!$paymentDate) {
+                    return redirect()->route('invoices.index', ['filter' => $filter])->withErrors('Dátum zaplatenia je povinný.');
+                }
+    
+                // Mark selected invoices as paid with the provided payment date
+                foreach ($selectedInvoices as $invoiceId) {
+                    $invoice = Invoice::find($invoiceId);
+                    if ($invoice) {
+                        $invoice->update([
+                            'status' => 'paid',
+                            'payment_date' => $paymentDate,
+                        ]);
+                    }
+                }
+                return redirect()->route('invoices.index', ['filter' => 'paid'])->with('status', 'Faktúry boli označené ako zaplatené s dátumom.');
+    
             } elseif ($action == 'download_selected') {
                 // Stiahnuť vybrané faktúry
                 return $this->downloadSelectedInvoices($selectedInvoices);
@@ -329,13 +362,14 @@ public function downloadSelectedInvoices(array $selectedInvoices)
 
         public function downloadPDF(Invoice $invoice)
     {
+        $user = auth()->user();
         $placeName = str_replace(' ', '_', $invoice->services->first()->place_name);
         $billingMonth = $invoice->billing_month;
 
         $pdfFileName = $placeName . '_mesiac_' . $billingMonth . '.pdf';
 
         //$pdf = PDF::loadView('invoices.pdf', compact('invoice'));
-        $pdf = \PDF::loadView('invoices.pdf', compact('invoice'));
+        $pdf = \PDF::loadView('invoices.pdf', compact('invoice', 'user'));
         return $pdf->download($pdfFileName);
     }
 
