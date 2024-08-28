@@ -13,7 +13,7 @@
         }
         .container {
             width: 100%;
-            max-width: 850px;
+            max-width: 800px;
             margin: 0 auto;
             padding: 0 10px;
         }
@@ -162,15 +162,14 @@
 
             <div class="client-info">
                 <div class="section-title">{{ __('Odoberateľ') }}</div>
+                <p class="info-text"><strong>{{ $invoice->residential_company_name }}</strong></p>
+                <p class="info-text">{{ $invoice->residential_company_address }}, {{ $invoice->residential_company_postal_code }}, {{ $invoice->residential_company_city }}</p>
                 @if($invoice->services->isNotEmpty() && !empty($invoice->services->first()->place_header))
                     <p class="info-text">{{ $invoice->services->first()->place_header }}</p>
                 @else
                     <p class="info-text">{{ __('Ziadna hlavicka nie je dostupna') }}</p>
                 @endif
-                <p class="info-text">{{ __('V zastúpení:') }}</p>
-                <p class="info-text"><strong>{{ $invoice->residential_company_name }}</strong></p>
-                <p class="info-text">{{ $invoice->residential_company_address }}, {{ $invoice->residential_company_postal_code }}, {{ $invoice->residential_company_city }}</p>
-        
+               
                 @if(!empty($invoice->residential_company_ico))
                     <p class="info-text">{{ __('IČO:') }} {{ $invoice->residential_company_ico }}</p>
                 @endif

@@ -23,6 +23,43 @@
             </a>
         </div>
 
+ <!-- Section for creating a new street -->
+ <section class="bg-white dark:bg-gray-800 shadow sm:rounded-lg p-6 mt-10">
+    <header>
+        <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">{{ __('Vytvoriť novú ulicu') }}</h2>
+    </header>
+    <form method="POST" action="{{ route('places.store') }}" class="space-y-6">
+        @csrf
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <x-input-label for="residential_company_id" :value="__('Bytový podnik')" />
+                <select id="residential_company_id" name="residential_company_id" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-lg">
+                    @foreach ($residential_companies as $company)
+                        <option value="{{ $company->id }}">{{ $company->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <x-input-label for="name" :value="__('*Názov ulice')" />
+                <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" required />
+                <x-input-error :messages="$errors->get('name')" class="mt-2" />
+            </div>
+        </div>
+
+        <div>
+            <x-input-label for="header" :value="__('Popis do hlavičky')" />
+            <textarea id="header" name="header" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-lg h-24"></textarea>
+            <x-input-error :messages="$errors->get('header')" class="mt-2" />
+        </div>
+
+        <div class="flex items-center justify-end mt-4">
+            <x-primary-button>{{ __('Uložiť') }}</x-primary-button>
+        </div>
+    </form>
+</section>
+
+
+
         <!-- Section for listing streets -->
         <section class="bg-white dark:bg-gray-800 shadow sm:rounded-lg p-6">
             <header class="flex items-center justify-between mb-6">
@@ -162,40 +199,7 @@
             </div>
         </section>
 
-        <!-- Section for creating a new street -->
-        <section class="bg-white dark:bg-gray-800 shadow sm:rounded-lg p-6 mt-10">
-            <header>
-                <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">{{ __('Vytvoriť novú ulicu') }}</h2>
-            </header>
-            <form method="POST" action="{{ route('places.store') }}" class="space-y-6">
-                @csrf
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <x-input-label for="residential_company_id" :value="__('Bytový podnik')" />
-                        <select id="residential_company_id" name="residential_company_id" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-lg">
-                            @foreach ($residential_companies as $company)
-                                <option value="{{ $company->id }}">{{ $company->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <x-input-label for="name" :value="__('*Názov ulice')" />
-                        <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" required />
-                        <x-input-error :messages="$errors->get('name')" class="mt-2" />
-                    </div>
-                </div>
-
-                <div>
-                    <x-input-label for="header" :value="__('Popis do hlavičky')" />
-                    <textarea id="header" name="header" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-lg h-24"></textarea>
-                    <x-input-error :messages="$errors->get('header')" class="mt-2" />
-                </div>
-
-                <div class="flex items-center justify-end mt-4">
-                    <x-primary-button>{{ __('Uložiť') }}</x-primary-button>
-                </div>
-            </form>
-        </section>
+       
     </div>
 
 <script>
