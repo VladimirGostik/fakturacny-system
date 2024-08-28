@@ -12,8 +12,8 @@
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
     <!-- Scripts -->
-    <link rel="stylesheet" href="{{ asset('build/assets/app-CmjRsux8.css') }}">
-    <script src="{{ asset('build/assets/app-S0zcb300.js') }}" defer></script>
+    <link rel="stylesheet" href="{{ asset('build/assets/app-D-STn4gQ.css') }}">
+    <script src="{{ asset('build/assets/app-SOzcb3O0.js') }}" defer></script>
     
 </head>
 <body class="font-sans antialiased">
