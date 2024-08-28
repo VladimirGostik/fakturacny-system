@@ -367,10 +367,14 @@ public function downloadSelectedInvoices(array $selectedInvoices)
         $billingMonth = $invoice->billing_month;
 
         $pdfFileName = $placeName . '_mesiac_' . $billingMonth . '.pdf';
-
-        //$pdf = PDF::loadView('invoices.pdf', compact('invoice'));
-        $pdf = \PDF::loadView('invoices.pdf', compact('invoice', 'user'));
-        return $pdf->download($pdfFileName);
+        
+        try {
+            $pdf = \PDF::loadView('invoices.pdf', compact('invoice', 'user'));
+            return $pdf->download($pdfFileName);
+        } catch (\Exception $e) {
+            Log::error('PDF download error: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to download PDF'], 500);
+        }
     }
 
 }
