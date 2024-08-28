@@ -230,7 +230,6 @@
         <div class="total-section">
             <h2>{{ __('Celková cena:') }} {{ number_format($invoice->services->sum('service_price'), 2) }} €</h2>
         </div>
-
         <!-- Signature Section -->
         <div class="signature-section">
             <div class="signature-left">
