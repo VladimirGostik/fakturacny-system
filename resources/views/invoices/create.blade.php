@@ -18,7 +18,7 @@
     @endif
 
     <!-- Box pre Generovanie mesačných faktúr -->
-    <div class="bg-white shadow-md rounded-lg p-6">
+    <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg p-6">
         <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">{{ __('Generovanie mesačných faktúr') }}</h1>
     
         <form method="POST" action="{{ route('invoices.generate_monthly') }}">
@@ -49,7 +49,7 @@
     </div>
 
     <!-- Box pre Vytvoriť novú faktúru -->
-    <div class="bg-white shadow-md rounded-lg p-6">
+    <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg p-6">
         <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">{{ __('Vytvoriť novú faktúru') }}</h1>
 
         <form method="POST" action="{{ route('invoices.store') }}">
