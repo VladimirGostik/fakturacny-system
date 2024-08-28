@@ -107,7 +107,7 @@ class InvoiceController extends Controller
 {
     // Validate the input data
     $validated = $request->validate([
-        'invoice_number' => 'required|string|max:255|unique:invoices',
+        'invoice_number' => 'required|string|max:255',
         'company_id' => 'required|exists:companies,id',
         'residential_company_id' => 'required|exists:residential_companies,id',
         'residential_company_name' => 'required|string|max:255',
@@ -219,7 +219,7 @@ public function generateMonthlyInvoices(Request $request)
             }
 
             // Get the latest invoice number and ensure it's unique
-            $newInvoiceNumber = $this->getNextInvoiceNumber();
+            $newInvoiceNumber = $this->generateInvoiceNumber($company->id, $billingMonth, $issueDate);
 
             // Generovanie faktúry a priradenie služieb
             $invoice = Invoice::create([
@@ -251,17 +251,28 @@ public function generateMonthlyInvoices(Request $request)
     return redirect()->route('invoices.index')->with('status', 'Mesačné faktúry boli úspešne vygenerované a uložené.');
 }
 
-private function getNextInvoiceNumber()
+private function generateInvoiceNumber($companyId, $billingMonth, $issueDate)
 {
-    $lastInvoice = Invoice::orderBy('invoice_number', 'desc')->first();
-    $newInvoiceNumber = $lastInvoice ? $lastInvoice->invoice_number + 1 : 1;
+    // Určte rok fakturácie
+    $billingYear = ($billingMonth == 12) ? date('Y', strtotime($issueDate)) - 1 : date('Y', strtotime($issueDate));
 
-    // Ensure the invoice number is unique
-    while (Invoice::where('invoice_number', $newInvoiceNumber)->exists()) {
-        $newInvoiceNumber++;
+    // Získajte najväčšie číslo faktúry pre daný rok a firmu
+    $lastInvoice = Invoice::where('company_id', $companyId)
+                    ->whereYear('issue_date', $billingYear)
+                    ->orderBy('invoice_number', 'desc')
+                    ->first();
+
+    // Získajte nové číslo faktúry
+    if ($lastInvoice) {
+        // Extrahujte časť čísla faktúry pred "/"
+        $lastInvoiceNumber = explode('/', $lastInvoice->invoice_number)[0];
+        $newInvoiceNumber = intval($lastInvoiceNumber) + 1;
+    } else {
+        $newInvoiceNumber = 1;
     }
 
-    return $newInvoiceNumber;
+    // Vytvorte nové číslo faktúry s rokom fakturácie
+    return $newInvoiceNumber . '/' . $billingYear;
 }
 
 
@@ -367,7 +378,7 @@ public function downloadSelectedInvoices(array $selectedInvoices)
         $billingMonth = $invoice->billing_month;
 
         $pdfFileName = $placeName . '_mesiac_' . $billingMonth . '.pdf';
-        
+
         try {
             $pdf = \PDF::loadView('invoices.pdf', compact('invoice', 'user'));
             return $pdf->download($pdfFileName);
