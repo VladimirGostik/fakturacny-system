@@ -37,7 +37,7 @@ return [
     'enabled' => true,
     'binary' => env('WKHTML_PDF_BINARY', '/app/bin/wkhtmltopdf'),
     'timeout' => false,
-    'options' => ['size' => 'A4',],
+    'options' => ['size' => 'A4'],
     'env' => [],
 ],
 
