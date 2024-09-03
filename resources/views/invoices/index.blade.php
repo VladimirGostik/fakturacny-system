@@ -76,6 +76,7 @@
                         <th class="px-4 py-2">
                             <input type="checkbox" id="select-all" class="hidden">
                         </th>
+                        <th class="px-4 py-2 cursor-pointer" id="invoice-number-header">{{ __('Číslo faktúry') }} ▲</th>
                         <th class="px-4 py-2">{{ __('Firma') }}</th>
                         <th class="px-4 py-2">{{ __('Bytový podnik') }}</th>
                         <th class="px-4 py-2">{{ __('Miesto') }}</th>
@@ -86,10 +87,11 @@
                 </thead>
                 <tbody id="invoice-list">
                     @foreach($invoices as $invoice)
-                    <tr class="hover:bg-gray-100 dark:hover:bg-gray-700" data-company="{{ $invoice->company_id }}" data-residential="{{ $invoice->residential_company_id }}" data-state="{{ $invoice->status }}">
+                    <tr class="hover:bg-gray-100 dark:hover:bg-gray-700" data-company="{{ $invoice->company_id }}" data-residential="{{ $invoice->residential_company_id }}" data-state="{{ $invoice->status }}" data-invoice-number="{{ $invoice->invoice_number }}">
                         <td class="px-4 py-2">
                             <input type="checkbox" name="selected_invoices[]" value="{{ $invoice->id }}" class="invoice-checkbox hidden">
                         </td>
+                        <td class="px-4 py-2">{{ $invoice->invoice_number }}</td>
                         <td class="px-4 py-2">{{ $invoice->company->name }}</td>
                         <td class="px-4 py-2">{{ $invoice->residential_company_name }}</td>
                         <td class="px-4 py-2 place-column">{{ $invoice->services->first()->place_name ?? 'N/A' }}</td>
@@ -128,12 +130,13 @@
     </div>
 </div>
 
-<!-- JavaScript for search, toggle, and filter functionality -->
+<!-- JavaScript for search, toggle, filter, and sort functionality -->
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         let urlParams = new URLSearchParams(window.location.search);
         let currentState = urlParams.get('filter') || 'created';  // Default state filter to 'created'
+        let sortDirection = 'asc';  // Default sort direction
 
         // Apply initial filter state from URL
         filterInvoices(currentState);
@@ -183,13 +186,18 @@
 
         // Company Filter Dropdown
         document.getElementById('company_filter').addEventListener('change', function() {
-            let selectedCompany = this.value;
             filterInvoices(currentState, searchBox.value.toLowerCase());
         });
 
         // Residential Company Filter Dropdown
         document.getElementById('residential_company_filter').addEventListener('change', function() {
             filterInvoices(currentState, searchBox.value.toLowerCase());
+        });
+
+        // Sorting by Invoice Number
+        document.getElementById('invoice-number-header').addEventListener('click', function() {
+            sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            sortInvoicesByNumber(sortDirection);
         });
 
         // Filtering function that respects both state, search term, and filters
@@ -228,6 +236,27 @@
                     button.classList.add('bg-blue-500');
                 }
             });
+        }
+
+        // Sort invoices by number
+        function sortInvoicesByNumber(direction) {
+            const rowsArray = Array.from(invoiceList.querySelectorAll('tr'));
+
+            rowsArray.sort((a, b) => {
+                const aNumber = parseInt(a.getAttribute('data-invoice-number'), 10);
+                const bNumber = parseInt(b.getAttribute('data-invoice-number'), 10);
+
+                return direction === 'asc' ? aNumber - bNumber : bNumber - aNumber;
+            });
+
+            // Clear and re-append sorted rows
+            invoiceList.innerHTML = '';
+            rowsArray.forEach(row => {
+                invoiceList.appendChild(row);
+            });
+
+            // Update sort indicator
+            document.getElementById('invoice-number-header').textContent = `Číslo faktúry ${direction === 'asc' ? '▲' : '▼'}`;
         }
 
         // Set bulk action based on selected invoices
@@ -285,7 +314,6 @@
             // Now submit the form
             document.getElementById('bulk-action-form').submit();
         }
-
 
         // Close Payment Date Modal
         window.closePaymentDateModal = function() {
