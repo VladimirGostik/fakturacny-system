@@ -55,13 +55,21 @@
         <form method="POST" action="{{ route('invoices.store') }}">
             @csrf
 
-            <!-- Dátum vytvorenia, Dátum splatnosti a Mesiac fakturácie -->
-            <!-- Invoice Number Field -->
-            <div class="grid grid-cols-2 gap-4 mt-6">
+            <!-- Checkbox pre automatické generovanie čísla faktúry -->
+            <div class="grid grid-cols-3 gap-4 mt-6">
+                <div class="flex items-center mt-6">
+                    <!-- Hidden input to handle the unchecked state -->
+                    <input type="hidden" name="auto_generate" value="false">
+                    <input type="checkbox" id="auto_generate" name="auto_generate" value="true" class="mr-2" {{ old('auto_generate') == 'true' ? 'checked' : '' }}>
+                    <x-input-label for="auto_generate" :value="__('Automaticky generovať číslo faktúry')" class="text-lg" />
+                </div>
+
+                <!-- Pole pre manuálne zadanie čísla faktúry -->
                 <div class="mt-6">
                     <x-input-label for="invoice_number" :value="__('Číslo faktúry')" class="text-lg" />
                     <x-text-input id="invoice_number" name="invoice_number" type="text" class="mt-1 block w-full" required />
                 </div>
+
                 <div class="mt-6">
                     <x-input-label for="billing_month" :value="__('Mesiac fakturácie')" class="text-lg" />
                     <select id="billing_month" name="billing_month" class="mt-1 block w-full" required>
@@ -71,6 +79,7 @@
                     </select>
                 </div>
             </div>
+
             <div class="grid grid-cols-2 gap-4 mt-6">
                 <div>
                     <x-input-label for="issue_date" :value="__('Dátum vytvorenia')" class="text-lg" />
@@ -383,6 +392,16 @@
                     servicesSection.removeChild(newServiceRow);
                 });
             });
+        }
+    });
+
+    document.getElementById('auto_generate').addEventListener('change', function() {
+        let invoiceNumberInput = document.getElementById('invoice_number');
+        if (this.checked) {
+            invoiceNumberInput.disabled = true;
+            invoiceNumberInput.value = ''; // Clear any previous value
+        } else {
+            invoiceNumberInput.disabled = false;
         }
     });
 </script>

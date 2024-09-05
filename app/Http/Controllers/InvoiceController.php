@@ -1,9 +1,10 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use ZipArchive;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Log;
 use App\Models\Invoice;
 use App\Models\InvoiceService;
 use App\Models\Company;
@@ -19,15 +20,17 @@ class InvoiceController extends Controller
 
     public function index(Request $request)
     {
-        // Načítanie všetkých faktúr z databázy
-        $filter = $request->query('filter', 'created'); // Predvolene zobrazíme "vytvorené" faktúry, ak nie je filter nastavený
+        $filter = $request->query('filter', 'created');
+        $perPage = $request->query('perPage', 10); // Default to 10 items per page if not specified
         $residentialCompanies = ResidentialCompany::all();
         $companies = Company::all();
-        $invoices = Invoice::all();
-
-        // Návrat pohľadu s faktúrami
-        return view('invoices.index', compact('invoices','companies','filter','residentialCompanies'));
+    
+        // Paginate invoices with the number of items per page selected by the user
+        $invoices = Invoice::where('status', $filter)->paginate($perPage);
+    
+        return view('invoices.index', compact('invoices', 'companies', 'filter', 'residentialCompanies', 'perPage'));
     }
+    
 
     public function create()
     {
@@ -57,7 +60,17 @@ class InvoiceController extends Controller
 {
     // Validácia vstupných údajov
     $validated = $request->validate([
-        'invoice_number' => 'required|string|max:255|unique:invoices,invoice_number,' . $invoice->id,
+        'invoice_number' => [
+            'required',
+            'string',
+            'max:255',
+            // Kontrola unikátnosti čísla faktúry v rámci danej firmy
+            Rule::unique('invoices')->where(function ($query) use ($request, $invoice) {
+                return $query->where('company_id', $request->company_id)
+                             ->where('invoice_number', $request->invoice_number)
+                             ->where('id', '!=', $invoice->id);
+            }),
+        ],
         'company_id' => 'required|exists:companies,id',
         'residential_company_id' => 'required|exists:residential_companies,id',
         'residential_company_name' => 'required|string|max:255',
@@ -103,11 +116,12 @@ class InvoiceController extends Controller
 
     return redirect()->route('invoices.show', $invoice)->with('status', 'Faktúra bola úspešne aktualizovaná!');
 }
-    public function store(Request $request)
+public function store(Request $request)
 {
-    // Validate the input data
+    // Validácia vstupných údajov
     $validated = $request->validate([
-        'invoice_number' => 'required|string|max:255',
+        //'invoice_number' => 'nullable|string|max:255', // Bude validované len ak nie je automaticky generované
+        //'auto_generate' => 'required|in:true,false', // Check that it is either "true" or "false"
         'company_id' => 'required|exists:companies,id',
         'residential_company_id' => 'required|exists:residential_companies,id',
         'residential_company_name' => 'required|string|max:255',
@@ -130,10 +144,28 @@ class InvoiceController extends Controller
         'header' => 'nullable|string|max:255',
     ]);
     //dd($request->all());
+    // Ak je checkbox zaškrtnutý, generujeme číslo faktúry automaticky
+    if ($request['auto_generate'] === 'true') {
+        $invoiceNumber = $this->generateInvoiceNumber($validated['company_id'], $validated['billing_month'], $validated['issue_date']);
+    } else {
+        // Manually entered invoice number with uniqueness validation
+        $validated = $request->validate([
+            'invoice_number' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('invoices')->where(function ($query) use ($request) {
+                    return $query->where('company_id', $request->company_id)
+                                 ->where('invoice_number', $request->invoice_number);
+                }),
+            ],
+        ]);
+        $invoiceNumber = $request['invoice_number'];
+    }
 
-    // Create the invoice with the validated data
+    // Vytvorenie novej faktúry
     $invoice = Invoice::create([
-        'invoice_number' => $validated['invoice_number'],
+        'invoice_number' => $invoiceNumber,
         'company_id' => $validated['company_id'],
         'residential_company_id' => $validated['residential_company_id'],
         'residential_company_name' => $validated['residential_company_name'],
@@ -149,17 +181,17 @@ class InvoiceController extends Controller
         'due_date' => $validated['due_date'],
         'billing_month' => $validated['billing_month'],
     ]);
-    //dd($validated);
 
     $placeName = $validated['new_street'] ?: Place::find($validated['existing_place'])->name;
-    // Save services if any are provided
+
+    // Uloženie služieb ak sú poskytnuté
     if (isset($validated['services'])) {
         foreach ($validated['services'] as $serviceData) {
             InvoiceService::create([
                 'invoice_id' => $invoice->id,
                 'service_description' => $serviceData['description'],
                 'service_price' => $serviceData['price'],
-                'place_name' => $placeName,  // Either the new street or the existing place's name
+                'place_name' => $placeName,
                 'place_header' => $validated['header'],
             ]);
         }
@@ -167,6 +199,7 @@ class InvoiceController extends Controller
 
     return redirect()->route('invoices.index')->with('status', 'Faktúra bola úspešne vytvorená!');
 }
+
 
 public function destroy($id)
 {
@@ -279,40 +312,36 @@ private function generateInvoiceNumber($companyId, $billingMonth, $issueDate)
 
 public function downloadSelectedInvoices(array $selectedInvoices)
 {
-
-    $zip = new ZipArchive;
     $user = auth()->user();
-    $firstInvoice = Invoice::find($selectedInvoices[0]);
-    $companyName = str_replace(' ', '_', $firstInvoice->company->name);
-    $billingMonth = $firstInvoice->billing_month;
+    
+    // Načítame všetky faktúry a služby pre vybrané faktúry
+    $invoices = Invoice::with('services', 'company')->whereIn('id', $selectedInvoices)->get();
 
-    $zipFileName = $companyName . '_mesiac_' . $billingMonth . '.zip';
-    $zipFilePath = storage_path($zipFileName);
-
-    if ($zip->open($zipFilePath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
-        foreach ($selectedInvoices as $invoiceId) {
-            $invoice = Invoice::find($invoiceId);
-
-            $pdf = PDF::loadView('invoices.pdf', compact('invoice', 'user'));
-            $pdfContent = $pdf->output();
-            
-            // Set the name of individual invoices within the ZIP archive
-            $placeName = str_replace(' ', '_', $invoice->services->first()->place_name);
-            $fileName = $placeName . '_mesiac_' . $billingMonth . '.pdf';
-
-            // Add the PDF file to the ZIP archive
-            $zip->addFromString($fileName, $pdfContent);
-        }
-        $zip->close();
-    } else {
-        return redirect()->route('invoices.index')->with('error', 'Unable to create ZIP file.');
+    if ($invoices->isEmpty()) {
+        return redirect()->route('invoices.index')->with('error', 'Žiadne faktúry na spracovanie.');
     }
 
-    // Download the ZIP file and delete it after sending
-    return response()->download($zipFilePath)->deleteFileAfterSend(true);
+    // Začneme HTML výstup pre všetky faktúry
+    $htmlContent = '';
+
+    foreach ($invoices as $invoice) {
+        // Pre každú faktúru vygenerujeme obsah HTML (zvýraznené neskoršie zlúčenie do jedného PDF)
+        $htmlContent .= view('invoices.pdf', compact('invoice', 'user'))->render();
+        $htmlContent .= '<div style="page-break-after: always;"></div>'; // Pridáme zalomenie stránky
+    }
+
+    // Vytvoríme jedno veľké PDF z HTML obsahu všetkých faktúr
+    $pdf = PDF::loadHTML($htmlContent);
+
+    // Generovanie názvu PDF súboru
+    $firstInvoice = $invoices->first();
+    $companyName = str_replace(' ', '_', $firstInvoice->company->name);
+    $billingMonth = $firstInvoice->billing_month;
+    $pdfFileName = $companyName . '_mesiac_' . $billingMonth . '.pdf';
+
+    // Stiahnutie PDF súboru obsahujúceho všetky faktúry
+    return $pdf->download($pdfFileName);
 }
-
-
 
 
     public function bulkAction(Request $request)
