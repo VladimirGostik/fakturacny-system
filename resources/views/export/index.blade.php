@@ -45,19 +45,19 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
                 <div class="stat-box bg-blue-500 text-white p-6 rounded-lg shadow-md">
                     <h2 class="text-xl font-bold">{{ __('Počet bytových podnikov') }}</h2>
-                    <p class="text-4xl">{{ $statistics[$company->id]['total_residential_companies'] }}</p>
+                    <p class="text-3xl">{{ $statistics[$company->id]['total_residential_companies'] }}</p>
                 </div>
                 <div class="stat-box bg-green-500 text-white p-6 rounded-lg shadow-md">
                     <h2 class="text-xl font-bold">{{ __('Počet miest') }}</h2>
-                    <p class="text-4xl">{{ $statistics[$company->id]['total_places'] }}</p>
+                    <p class="text-3xl">{{ $statistics[$company->id]['total_places'] }}</p>
                 </div>
                 <div class="stat-box bg-yellow-500 text-white p-6 rounded-lg shadow-md">
                     <h2 class="text-xl font-bold">{{ __('Počet faktúr') }}</h2>
-                    <p class="text-4xl">{{ $statistics[$company->id]['total_paid_invoices'] }}</p>
+                    <p class="text-3xl">{{ $statistics[$company->id]['total_paid_invoices'] }}</p>
                 </div>
                 <div class="stat-box bg-red-500 text-white p-6 rounded-lg shadow-md">
                     <h2 class="text-xl font-bold">{{ __('Súčet všetkých faktúr') }}</h2>
-                    <p class="text-4xl">{{ $statistics[$company->id]['total_invoice_sum'] }} €</p>
+                    <p class="text-3xl">{{ $statistics[$company->id]['total_invoice_sum'] }} €</p>
                 </div>
             </div>
         </div>

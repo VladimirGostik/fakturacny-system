@@ -70,6 +70,17 @@
             <input type="hidden" id="selected_invoices_input" name="selected_invoices_list" value="">
             <input type="hidden" id="filter-input" name="filter" value="{{ $filter }}"> <!-- Skrytý input pre filter -->
 
+            <!-- Počet zobrazených faktúr na stránku -->
+            <div class="mb-4">
+                <label for="items-per-page" class="text-white">{{ __('Počet faktúr na stránku:') }}</label>
+                <select id="items-per-page" class="ml-2 border rounded text-black">
+                    <option value="10" {{ $perPage == 10 ? 'selected' : '' }}>10</option>
+                    <option value="25" {{ $perPage == 25 ? 'selected' : '' }}>25</option>
+                    <option value="50" {{ $perPage == 50 ? 'selected' : '' }}>50</option>
+                    <option value="100" {{ $perPage == 100 ? 'selected' : '' }}>100</option>
+                </select>
+            </div>
+
             <table class="min-w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg">
                 <thead>
                     <tr class="bg-gray-200 dark:bg-gray-700">
@@ -105,6 +116,11 @@
                     @endforeach
                 </tbody>
             </table>
+
+            <!-- Pagination Container -->
+            <div id="pagination-container" class="mt-4 flex justify-center">
+                {{ $invoices->links() }}
+            </div>
 
             <!-- Bulk Action Buttons -->
             <div class="mt-4 space-x-4 text-center">
@@ -181,6 +197,7 @@
                 let url = new URL(window.location.href);
                 url.searchParams.set('filter', currentState);
                 window.history.pushState({}, '', url);
+                window.location.reload(); 
             });
         });
 
@@ -198,6 +215,13 @@
         document.getElementById('invoice-number-header').addEventListener('click', function() {
             sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
             sortInvoicesByNumber(sortDirection);
+        });
+
+        // Change the number of items per page
+        document.getElementById('items-per-page').addEventListener('change', function() {
+            let url = new URL(window.location.href);
+            url.searchParams.set('perPage', this.value);
+            window.location.href = url.href;
         });
 
         // Filtering function that respects both state, search term, and filters
