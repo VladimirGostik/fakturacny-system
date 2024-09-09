@@ -93,7 +93,7 @@ class InvoiceController extends Controller
                     'required',
                     Rule::in([
                         'Hlavicka-Adresa-Nazov',
-                        'Hlavicka-Adresa-R',
+                        'Nazov-Adresa-Hlavicka',
                         'Hlavicka-Nazov-Adresa',
                         'Nazov-Hlavicka-Adresa',
                         'Adresa-Nazov-Hlavicka',
@@ -230,67 +230,84 @@ public function destroy($id)
 }
 
 public function generateMonthlyInvoices(Request $request)
-    {
-        $validated = $request->validate([
-            'issue_date' => 'required|date',
-            'due_date' => 'required|date',
-            'billing_month' => 'required|integer|min:1|max:12',
-        ]);
+{
+    $validated = $request->validate([
+        'issue_date' => 'required|date',
+        'due_date' => 'required|date',
+        'billing_month' => 'required|integer|min:1|max:12',
+    ]);
 
-        $issueDate = $validated['issue_date'];
-        $dueDate = $validated['due_date'];
-        $billingMonth = $validated['billing_month'];
+    $issueDate = $validated['issue_date'];
+    $dueDate = $validated['due_date'];
+    $billingMonth = $validated['billing_month'];
 
-        $residentialCompanies = ResidentialCompany::with('places.services', 'company')->get();
+    // Získame všetky bytové podniky s miestami a službami
+    $residentialCompanies = ResidentialCompany::with('places.services', 'company')->get();
 
-        foreach ($residentialCompanies as $residentialCompany) {
-            $company = $residentialCompany->company;
+    foreach ($residentialCompanies as $residentialCompany) {
+        $company = $residentialCompany->company;
 
-            if (!$company) {
-                continue;
-            }
-
-            $places = $residentialCompany->places()->with('services')->get();
-            
-            if ($places->isEmpty()) {
-                continue;
-            }
-
-            foreach ($places as $place) {
-                if ($place->services->isEmpty()) {
-                    continue;
-                }
-
-                $newInvoiceNumber = $this->generateInvoiceNumber($company->id, $billingMonth, $issueDate);
-                $invoice = Invoice::create([
-                    'invoice_number' => $newInvoiceNumber,
-                    'company_id' => $company->id,
-                    'residential_company_id' => $residentialCompany->id,
-                    'residential_company_name' => $residentialCompany->name,
-                    'residential_company_address' => $residentialCompany->address,
-                    'residential_company_city' => $residentialCompany->city,
-                    'residential_company_postal_code' => $residentialCompany->postal_code,
-                    'issue_date' => $issueDate,
-                    'due_date' => $dueDate,
-                    'billing_month' => $billingMonth,
-                    'invoice_type' => 'Hlavicka-Adresa-Nazov', // Default value
-                ]);
-
-                foreach ($place->services as $service) {
-                    InvoiceService::create([
-                        'invoice_id' => $invoice->id,
-                        'service_description' => $service->service_description,
-                        'service_price' => $service->service_price,
-                        'place_name' => $place->name,
-                        'place_header' => $place->header,
-                        'desc_above_service' => $place->desc_above_service,
-                    ]);
-                }
-            }
+        if (!$company) {
+            continue;
         }
 
-        return redirect()->route('invoices.index')->with('status', 'Mesačné faktúry boli úspešne vygenerované a uložené.');
+        // Získame všetky ulice pre tento bytový podnik
+        $places = $residentialCompany->places()->with('services')->get();
+
+        if ($places->isEmpty()) {
+            continue;
+        }
+
+        foreach ($places as $place) {
+            if ($place->services->isEmpty()) {
+                continue;
+            }
+
+            // Nájdeme poslednú faktúru pre túto firmu, bytový podnik a ulicu
+            $lastInvoice = Invoice::where('company_id', $company->id)
+                ->where('residential_company_id', $residentialCompany->id)
+                ->whereHas('services', function($query) use ($place) {
+                    $query->where('place_name', $place->name);
+                })
+                ->orderBy('issue_date', 'desc')
+                ->first();
+
+            // Ak existuje posledná faktúra, použijeme jej typ, inak nastavíme predvolený typ
+            $invoiceType = $lastInvoice ? $lastInvoice->invoice_type : 'Hlavicka-Adresa-Nazov';
+
+            // Vytvoríme nové číslo faktúry
+            $newInvoiceNumber = $this->generateInvoiceNumber($company->id, $billingMonth, $issueDate);
+
+            // Generovanie faktúry a priradenie služieb
+            $invoice = Invoice::create([
+                'invoice_number' => $newInvoiceNumber,
+                'company_id' => $company->id,
+                'residential_company_id' => $residentialCompany->id,
+                'residential_company_name' => $residentialCompany->name,
+                'residential_company_address' => $residentialCompany->address,
+                'residential_company_city' => $residentialCompany->city,
+                'residential_company_postal_code' => $residentialCompany->postal_code,
+                'issue_date' => $issueDate,
+                'due_date' => $dueDate,
+                'billing_month' => $billingMonth,
+                'invoice_type' => $invoiceType,  // Nastavenie typu faktúry
+            ]);
+
+            // Uložíme služby do `invoice_services`
+            foreach ($place->services as $service) {
+                InvoiceService::create([
+                    'invoice_id' => $invoice->id,
+                    'service_description' => $service->service_description,
+                    'service_price' => $service->service_price,
+                    'place_name' => $place->name,
+                    'place_header' => $place->header,
+                    'desc_above_service' => $place->desc_above_service,
+                ]);
+            }
+        }
     }
+    return redirect()->route('invoices.index')->with('status', 'Mesačné faktúry boli úspešne vygenerované a uložené.');
+}
 
 
 private function generateInvoiceNumber($companyId, $billingMonth, $issueDate)
