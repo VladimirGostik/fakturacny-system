@@ -80,6 +80,18 @@
                 </div>
             </div>
 
+            <div class="mt-6">
+                <x-input-label for="invoice_type" :value="__('Typ faktúry')" class="text-lg" />
+                <select id="invoice_type" name="invoice_type" class="mt-1 block w-full" required>
+                    <option value="Hlavicka-Adresa-Nazov">Hlavicka-Adresa-Nazov</option>
+                    <option value="Hlavicka-Nazov-Adresa">Hlavicka-Nazov-Adresa</option>
+                    <option value="Adresa-Hlavicka-Nazov">Adresa-Hlavicka-Nazov</option>
+                    <option value="Adresa-Nazov-Hlavicka">Adresa-Nazov-Hlavicka</option>
+                    <option value="Nazov-Hlavicka-Adresa">Nazov-Hlavicka-Adresa</option>
+                    <option value="Nazov-Adresa-Hlavicka">Nazov-Adresa-Hlavicka</option>
+                </select>
+            </div>
+
             <div class="grid grid-cols-2 gap-4 mt-6">
                 <div>
                     <x-input-label for="issue_date" :value="__('Dátum vytvorenia')" class="text-lg" />
@@ -182,6 +194,10 @@
                 <div>
                     <x-input-label for="header" :value="__('Popis do hlavičky')" class="text-lg" />
                     <textarea id="header" name="header" class="mt-1 block w-full"></textarea>
+                </div>
+                <div> <!-- Pridanie poľa pre popis nad služby -->
+                    <x-input-label for="desc_above_service" :value="__('Popis nad služby')" class="text-lg" />
+                    <textarea id="desc_above_service" name="desc_above_service" class="mt-1 block w-full"></textarea>
                 </div>
             </div>
 

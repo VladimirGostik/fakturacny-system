@@ -28,6 +28,7 @@ class PlaceController extends Controller
             'name' => 'required|string|max:255',
             'residential_company_id' => 'required|exists:residential_companies,id',
             'header' => 'nullable|string',
+            'desc_above_service' => 'nullable|string|max:255',
         ]);
 
         // Vytvorenie novej ulice
@@ -47,6 +48,7 @@ class PlaceController extends Controller
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'header' => 'nullable|string',
+            'desc_above_service' => 'nullable|string|max:255',
         ]);
 
         $place = Place::find($id);

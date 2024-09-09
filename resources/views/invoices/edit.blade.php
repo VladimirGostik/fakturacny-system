@@ -53,6 +53,24 @@
             </div>
         </div>
 
+        <div class="mt-6">
+            <x-input-label for="invoice_type" :value="__('Typ faktúry')" class="text-lg" />
+            <select id="invoice_type" name="invoice_type" class="mt-1 block w-full" required>
+                <option value="Hlavicka-Adresa-Nazov" {{ $invoice->invoice_type == 'Hlavicka-Adresa-Nazov' ? 'selected' : '' }}>Hlavicka-Adresa-Nazov</option>
+                <option value="Hlavicka-Nazov-Adresa" {{ $invoice->invoice_type == 'Hlavicka-Nazov-Adresa' ? 'selected' : '' }}>Hlavicka-Nazov-Adresa</option>
+                <option value="Adresa-Hlavicka-Nazov" {{ $invoice->invoice_type == 'Adresa-Hlavicka-Nazov' ? 'selected' : '' }}>Adresa-Hlavicka-Nazov</option>
+                <option value="Adresa-Nazov-Hlavicka" {{ $invoice->invoice_type == 'Adresa-Nazov-Hlavicka' ? 'selected' : '' }}>Adresa-Nazov-Hlavicka</option>
+                <option value="Nazov-Hlavicka-Adresa" {{ $invoice->invoice_type == 'Nazov-Hlavicka-Adresa' ? 'selected' : '' }}>Nazov-Hlavicka-Adresa</option>
+                <option value="Nazov-Adresa-Hlavicka" {{ $invoice->invoice_type == 'Nazov-Adresa-Hlavicka' ? 'selected' : '' }}>Nazov-Adresa-Hlavicka</option>
+            </select>
+            
+        </div>
+
+        <div class="mt-6">
+            <x-input-label for="desc_above_services" :value="__('Popis nad služby')" class="text-lg" />
+            <textarea id="desc_above_services" name="desc_above_services" class="mt-1 block w-full">{{ $invoice->desc_above_services }}</textarea>
+        </div>
+
         <!-- Company and Residential Company -->
         <div class="grid grid-cols-2 gap-4 mt-6">
             <div>

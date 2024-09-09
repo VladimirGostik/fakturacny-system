@@ -16,6 +16,7 @@ class InvoiceService extends Model
         'service_price',
         'place_name',
         'place_header',
+        'desc_above_service',
     ];
 
     // Vzťah k faktúre

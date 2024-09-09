@@ -75,7 +75,7 @@
 
         .invoice-details p {
             margin: 5px 0;
-            font-size: 14px;
+            font-size: 18px;
         }
 
         .table {
@@ -147,6 +147,14 @@
         <div class="header">
             <h1>{{ __('Faktúra') }} č.{{ $invoice->invoice_number }}</h1>
         </div>
+        <div class="invoice-details">
+            <strong>
+                <span>{{ __('Fakturačný mesiac:') }} {{ $invoice->billing_month }}</span>
+                <span class="spacer">{{ __('Dátum vystavenia:') }} {{ \Carbon\Carbon::parse($invoice->issue_date)->format('d-m-Y') }}</span>
+                <span class="spacer">{{ __('Dátum splatnosti:') }} {{ \Carbon\Carbon::parse($invoice->due_date)->format('d-m-Y') }}</span>
+            </strong>
+        </div>
+        
 
         <!-- Company & Client Information -->
         <div class="invoice-info">
@@ -162,15 +170,24 @@
 
             <div class="client-info">
                 <div class="section-title">{{ __('Odoberateľ') }}</div>
-                @if($invoice->services->isNotEmpty() && !empty($invoice->services->first()->place_header))
-                    <p class="info-text">{{ $invoice->services->first()->place_header }}</p>
-                @else
-                    <p class="info-text">{{ __('Ziadna hlavicka nie je dostupna') }}</p>
+                @php
+                $order = explode('-', $invoice->invoice_type);
+                @endphp
+
+            @foreach($order as $item)
+                @if($item == 'Hlavicka') <!-- Hlavička -->
+                    @if($invoice->services->isNotEmpty() && !empty($invoice->services->first()->place_header))
+                        <p class="info-text">{{ $invoice->services->first()->place_header }}</p>
+                    @else
+                        <p class="info-text">{{ __('Ziadna hlavicka nie je dostupna') }}</p>
+                    @endif
+                @elseif($item == 'Nazov') <!-- Názov -->
+                    <p class="info-text"><strong>{{ $invoice->residential_company_name }}</strong></p>
+                @elseif($item == 'Adresa') <!-- Adresa -->
+                    <p class="info-text">{{ $invoice->residential_company_address }}, {{ $invoice->residential_company_postal_code }}, {{ $invoice->residential_company_city }}</p>
                 @endif
-                <p class="info-text">{{ __('V zastúpení:') }}</p>
-                <p class="info-text"><strong>{{ $invoice->residential_company_name }}</strong></p>
-                <p class="info-text">{{ $invoice->residential_company_address }}, {{ $invoice->residential_company_postal_code }}, {{ $invoice->residential_company_city }}</p>
-        
+            @endforeach
+
                 @if(!empty($invoice->residential_company_ico))
                     <p class="info-text">{{ __('IČO:') }} {{ $invoice->residential_company_ico }}</p>
                 @endif
@@ -195,16 +212,12 @@
             <p class="info-text"><strong>{{ __('Bankove spojenie:') }}</strong> {{ $invoice->company->bank_connection }}</p>
             <p class="info-text"><strong>{{ __('Forma úhrady:') }}</strong> Prevodom</p> <!-- Added payment method -->
         </div>
-
-        <!-- Invoice Details -->
-        <div class="invoice-details">
-            <strong>
-                <span>{{ __('Fakturačný mesiac:') }} {{ $invoice->billing_month }}</span>
-                <span class="spacer">{{ __('Dátum vystavenia:') }} {{ $invoice->issue_date }}</span>
-                <span class="spacer">{{ __('Dátum splatnosti:') }} {{ $invoice->due_date }}</span>
-            </strong>
-        </div>
-        
+       
+        @if(!empty($invoice->services->first()->desc_above_service))
+            <div class="desc-above-service">
+                {{ $invoice->services->first()->desc_above_service }}
+            </div>
+        @endif
 
         <!-- Services Table -->
         <table class="table">
