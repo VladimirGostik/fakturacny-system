@@ -306,8 +306,10 @@ public function generateMonthlyInvoices(Request $request)
             }
         }
     }
+
     return redirect()->route('invoices.index')->with('status', 'Mesačné faktúry boli úspešne vygenerované a uložené.');
 }
+
 
 
 private function generateInvoiceNumber($companyId, $billingMonth, $issueDate)

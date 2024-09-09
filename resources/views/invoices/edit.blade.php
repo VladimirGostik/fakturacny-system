@@ -67,8 +67,8 @@
         </div>
 
         <div class="mt-6">
-            <x-input-label for="desc_above_services" :value="__('Popis nad služby')" class="text-lg" />
-            <textarea id="desc_above_services" name="desc_above_services" class="mt-1 block w-full">{{ $invoice->desc_above_services }}</textarea>
+            <x-input-label for="desc_above_service" :value="__('Popis nad služby')" class="text-lg" />
+            <textarea id="desc_above_service" name="desc_above_service" class="mt-1 block w-full">{{ $invoice->desc_above_services }}</textarea>
         </div>
 
         <!-- Company and Residential Company -->
