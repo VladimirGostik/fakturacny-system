@@ -9,7 +9,7 @@ class Place extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name','residential_company_id', 'header'];
+    protected $fillable = ['name','residential_company_id', 'header','desc_above_service'];
 
     public function residentialCompany()
     {

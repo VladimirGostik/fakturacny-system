@@ -7,32 +7,32 @@
         body {
             font-family: DejaVu Sans, sans-serif;
             color: #333;
-            line-height: 1.4;
+            line-height: 1.6;
             margin: 0;
             padding: 0;
         }
         .container {
             width: 100%;
-            max-width: 700px; /* Pôvodne 800px, zmenšené na 700px */
+            max-width: 850px;
             margin: 0 auto;
             padding: 0 10px;
         }
         .header {
             background-color: #f5f5f5;
-            padding: 15px; /* Pôvodne 20px */
+            padding: 20px;
             text-align: center;
             border-bottom: 4px solid #2f5597;
         }
         .header h1 {
             margin: 0;
-            font-size: 22px; /* Pôvodne 24px */
+            font-size: 24px;
             color: #333;
         }
         .invoice-info {
-            margin-top: 15px; /* Pôvodne 20px */
+            margin-top: 20px;
         }
         .company-info, .client-info {
-            width: 48%; /* Pôvodne 49% */
+            width: 49%;
             display: inline-block;
             vertical-align: top;
         }
@@ -42,48 +42,49 @@
         .section-title {
             font-weight: bold;
             color: #2f5597;
-            font-size: 16px; /* Pôvodne 18px */
-            margin-bottom: 15px; /* Pôvodne 20px */
+            font-size: 18px;
+            margin-bottom: 20px;
         }
         .info-text {
-            margin: 3px 0; /* Pôvodne 5px */
+            margin: 5px 0;
             color: #555;
-            font-size: 13px; /* Zmenšené písmo */
         }
         .invoice-details {
             width: 100%;
-            margin: 10px auto; /* Pôvodne 15px */
+            margin: 15px auto;
             background-color: #2f5597c0;
             border-radius: 8px;
             text-align: center;
-            padding: 10px; /* Pridaný padding */
         }
 
         .invoice-details strong span {
             display: inline-block;
-            margin: 0 10px; /* Pôvodne 15px */
-            font-size: 13px; /* Zmenšené písmo */
+            margin: 0 15px;
         }
 
         .payment-details {
             background-color: #3576c0a6;
-            padding: 15px; /* Pôvodne 20px */
-            margin: 20px 0; /* Pôvodne 30px */
+            padding: 20px;
+            margin: 30px 0;
             border-radius: 10px;
             text-align: left;
             display: inline-block;
             border: 2px solid #2f5597;
-            width: 92%; /* Zmenšená šírka */
+            width: 95%;
+        }
+
+        .invoice-details p {
+            margin: 5px 0;
+            font-size: 18px;
         }
 
         .table {
             width: 100%;
             border-collapse: collapse;
-            margin: 20px 0; /* Pôvodne 30px */
-            font-size: 13px; /* Zmenšené písmo */
+            margin: 30px 0;
         }
         .table th, .table td {
-            padding: 10px 12px; /* Pôvodne 12px 15px */
+            padding: 12px 15px;
             border: 1px solid #ddd;
             text-align: left;
         }
@@ -99,16 +100,16 @@
             font-weight: bold;
         }
         .total-section {
-            margin-top: 20px; /* Pôvodne 30px */
+            margin-top: 30px;
             text-align: right;
         }
         .total-section h2 {
             margin: 0;
-            font-size: 20px; /* Pôvodne 22px */
+            font-size: 22px;
             color: #2f5597;
         }
         .footer {
-            margin-top: 40px; /* Pôvodne 50px */
+            margin-top: 50px;
             padding: 10px 0;
             text-align: center;
             font-size: 12px;
@@ -122,8 +123,8 @@
         }
 
         .signature-section div {
-            margin-top: 70px; /* Pôvodne 100px */
-            width: 48%; /* Zmenšené */
+            margin-top: 100px;
+            width: 49%;
             display: inline-block;
             vertical-align: top;
         }
@@ -131,7 +132,7 @@
             text-align: right;
         }
         .signature-line {
-            margin-top: 30px; /* Pôvodne 40px */
+            margin-top: 40px;
             border-top: 1px solid #333;
             padding-top: 5px;
             width: 80%;
@@ -146,6 +147,14 @@
         <div class="header">
             <h1>{{ __('Faktúra') }} č.{{ $invoice->invoice_number }}</h1>
         </div>
+        <div class="invoice-details">
+            <strong>
+                <span>{{ __('Fakturačný mesiac:') }} {{ $invoice->billing_month }}</span>
+                <span class="spacer">{{ __('Dátum vystavenia:') }} {{ \Carbon\Carbon::parse($invoice->issue_date)->format('d-m-Y') }}</span>
+                <span class="spacer">{{ __('Dátum splatnosti:') }} {{ \Carbon\Carbon::parse($invoice->due_date)->format('d-m-Y') }}</span>
+            </strong>
+        </div>
+        
 
         <!-- Company & Client Information -->
         <div class="invoice-info">
@@ -161,14 +170,24 @@
 
             <div class="client-info">
                 <div class="section-title">{{ __('Odoberateľ') }}</div>
-                <p class="info-text"><strong>{{ $invoice->residential_company_name }}</strong></p>
-                <p class="info-text">{{ $invoice->residential_company_address }}, {{ $invoice->residential_company_postal_code }}, {{ $invoice->residential_company_city }}</p>
-                @if($invoice->services->isNotEmpty() && !empty($invoice->services->first()->place_header))
-                    <p class="info-text">{{ $invoice->services->first()->place_header }}</p>
-                @else
-                    <p class="info-text">{{ __('Ziadna hlavicka nie je dostupna') }}</p>
+                @php
+                $order = explode('-', $invoice->invoice_type);
+                @endphp
+
+            @foreach($order as $item)
+                @if($item == 'Hlavicka') <!-- Hlavička -->
+                    @if($invoice->services->isNotEmpty() && !empty($invoice->services->first()->place_header))
+                        <p class="info-text">{{ $invoice->services->first()->place_header }}</p>
+                    @else
+                        <p class="info-text">{{ __('Ziadna hlavicka nie je dostupna') }}</p>
+                    @endif
+                @elseif($item == 'Nazov') <!-- Názov -->
+                    <p class="info-text"><strong>{{ $invoice->residential_company_name }}</strong></p>
+                @elseif($item == 'Adresa') <!-- Adresa -->
+                    <p class="info-text">{{ $invoice->residential_company_address }}, {{ $invoice->residential_company_postal_code }}, {{ $invoice->residential_company_city }}</p>
                 @endif
-               
+            @endforeach
+
                 @if(!empty($invoice->residential_company_ico))
                     <p class="info-text">{{ __('IČO:') }} {{ $invoice->residential_company_ico }}</p>
                 @endif
@@ -193,16 +212,12 @@
             <p class="info-text"><strong>{{ __('Bankove spojenie:') }}</strong> {{ $invoice->company->bank_connection }}</p>
             <p class="info-text"><strong>{{ __('Forma úhrady:') }}</strong> Prevodom</p> <!-- Added payment method -->
         </div>
-
-        <!-- Invoice Details -->
-        <div class="invoice-details">
-            <strong>
-                <span>{{ __('Fakturačný mesiac:') }} {{ $invoice->billing_month }}</span>
-                <span class="spacer">{{ __('Dátum vystavenia:') }} {{ $invoice->issue_date }}</span>
-                <span class="spacer">{{ __('Dátum splatnosti:') }} {{ $invoice->due_date }}</span>
-            </strong>
-        </div>
-        
+       
+        @if(!empty($invoice->services->first()->desc_above_service))
+            <div class="desc-above-service">
+                {{ $invoice->services->first()->desc_above_service }}
+            </div>
+        @endif
 
         <!-- Services Table -->
         <table class="table">
@@ -229,6 +244,7 @@
         <div class="total-section">
             <h2>{{ __('Celková cena:') }} {{ number_format($invoice->services->sum('service_price'), 2) }} €</h2>
         </div>
+
         <!-- Signature Section -->
         <div class="signature-section">
             <div class="signature-left">

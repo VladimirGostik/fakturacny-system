@@ -39,6 +39,12 @@
             </div>
         </div>
 
+        @if(!empty($invoice->services->first()->desc_above_service))
+            <div class="mt-6 text-center">
+                <p class="text-lg font-semibold text-gray-700 dark:text-gray-300">{{ $invoice->services->first()->desc_above_service }}</p>
+            </div>
+        @endif
+
         <!-- Tabuľka služieb -->
         <div class="mt-8">
             <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200">{{ __('Služby') }}</h3>
