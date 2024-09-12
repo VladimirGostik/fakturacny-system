@@ -21,15 +21,40 @@ class InvoiceController extends Controller
     public function index(Request $request)
     {
         $filter = $request->query('filter', 'created');
-        $perPage = $request->query('perPage', 10); // Default to 10 items per page if not specified
+        $perPage = $request->query('perPage', 10);
+        $sortBy = $request->query('sortBy', 'invoice_number');
+        $sortDirection = $request->query('sortDirection', 'asc');
+        $companyFilter = $request->query('company_filter');
+        $residentialFilter = $request->query('residential_company_filter');
+        $searchTerm = $request->query('search', '');  // Pridanie vyhľadávacieho výrazu z vyhľadávacieho poľa
+    
         $residentialCompanies = ResidentialCompany::all();
         $companies = Company::all();
     
-        // Paginate invoices with the number of items per page selected by the user
-        $invoices = Invoice::where('status', $filter)->paginate($perPage);
+        $query = Invoice::with('company', 'residentialCompany', 'services')
+                        ->where('status', $filter);
     
-        return view('invoices.index', compact('invoices', 'companies', 'filter', 'residentialCompanies', 'perPage'));
-    }
+        // Pridanie filtrov podľa spoločnosti a bytového podniku
+        if ($companyFilter) {
+            $query->where('company_id', $companyFilter);
+        }
+    
+        if ($residentialFilter) {
+            $query->where('residential_company_id', $residentialFilter);
+        }
+    
+        // Vyhľadávanie v miestach (places) podľa vyhľadávacieho poľa
+        if (!empty($searchTerm)) {
+            $query->whereHas('services', function ($query) use ($searchTerm) {
+                $query->where('place_name', 'like', '%' . $searchTerm . '%');  // Vyhľadávanie podľa názvu miesta
+            });
+        }
+    
+        // Zoradenie a stránkovanie
+        $invoices = $query->orderBy($sortBy, $sortDirection)->paginate($perPage);
+    
+        return view('invoices.index', compact('invoices', 'companies', 'filter', 'residentialCompanies', 'perPage', 'sortBy', 'sortDirection', 'companyFilter', 'residentialFilter', 'searchTerm'));
+    }    
     
 
     public function create()

@@ -13,26 +13,26 @@
         }
         .container {
             width: 100%;
-            max-width: 850px;
+            max-width: 700px; /* Pôvodne 800px, zmenšené na 700px */
             margin: 0 auto;
             padding: 0 10px;
         }
         .header {
             background-color: #f5f5f5;
-            padding: 20px;
+            padding: 15px; /* Pôvodne 20px */
             text-align: center;
             border-bottom: 4px solid #2f5597;
         }
         .header h1 {
             margin: 0;
-            font-size: 24px;
+            font-size: 22px; /* Pôvodne 24px */
             color: #333;
         }
         .invoice-info {
             margin-top: 20px;
         }
         .company-info, .client-info {
-            width: 49%;
+            width: 48%; /* Pôvodne 49% */
             display: inline-block;
             vertical-align: top;
         }
@@ -42,35 +42,38 @@
         .section-title {
             font-weight: bold;
             color: #2f5597;
-            font-size: 18px;
-            margin-bottom: 20px;
+            font-size: 15px; /* Pôvodne 18px */
+            margin-bottom: 15px; /* Pôvodne 20px */
         }
         .info-text {
-            margin: 5px 0;
+            margin: 3px 0; /* Pôvodne 5px */
             color: #555;
+            font-size: 13px; /* Zmenšené písmo */
         }
         .invoice-details {
             width: 100%;
-            margin: 15px auto;
+            margin: 10px auto; /* Pôvodne 15px */
             background-color: #2f5597c0;
             border-radius: 8px;
             text-align: center;
+            padding: 10px; /* Pridaný padding */
         }
 
         .invoice-details strong span {
             display: inline-block;
-            margin: 0 15px;
+            margin: 0 10px; /* Pôvodne 15px */
+            font-size: 13px; /* Zmenšené písmo */
         }
 
         .payment-details {
             background-color: #3576c0a6;
-            padding: 20px;
-            margin: 30px 0;
+            padding: 15px; /* Pôvodne 20px */
+            margin: 20px 0; /* Pôvodne 30px */
             border-radius: 10px;
             text-align: left;
             display: inline-block;
             border: 2px solid #2f5597;
-            width: 95%;
+            width: 92%; /* Zmenšená šírka */
         }
 
         .invoice-details p {
@@ -81,10 +84,11 @@
         .table {
             width: 100%;
             border-collapse: collapse;
-            margin: 30px 0;
+            margin: 20px 0; /* Pôvodne 30px */
+            font-size: 13px; /* Zmenšené písmo */
         }
         .table th, .table td {
-            padding: 12px 15px;
+            padding: 10px 12px; /* Pôvodne 12px 15px */
             border: 1px solid #ddd;
             text-align: left;
         }
@@ -100,12 +104,12 @@
             font-weight: bold;
         }
         .total-section {
-            margin-top: 30px;
+            margin-top: 20px; /* Pôvodne 30px */
             text-align: right;
         }
         .total-section h2 {
             margin: 0;
-            font-size: 22px;
+            font-size: 20px; /* Pôvodne 22px */
             color: #2f5597;
         }
         .footer {
@@ -123,8 +127,8 @@
         }
 
         .signature-section div {
-            margin-top: 100px;
-            width: 49%;
+            margin-top: 70px; /* Pôvodne 100px */
+            width: 48%; /* Zmenšené */
             display: inline-block;
             vertical-align: top;
         }
@@ -132,7 +136,7 @@
             text-align: right;
         }
         .signature-line {
-            margin-top: 40px;
+            margin-top: 30px; /* Pôvodne 40px */
             border-top: 1px solid #333;
             padding-top: 5px;
             width: 80%;

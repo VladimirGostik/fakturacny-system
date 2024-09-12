@@ -28,7 +28,7 @@
             <select id="company_filter" name="company_filter" class="mt-1 block w-full">
                 <option value="">{{ __('Všetky firmy') }}</option>
                 @foreach($companies as $company)
-                    <option value="{{ $company->id }}">{{ $company->name }}</option>
+                    <option value="{{ $company->id }}" {{ request('company_filter') == $company->id ? 'selected' : '' }}>{{ $company->name }}</option>
                 @endforeach
             </select>
         </div>
@@ -39,7 +39,7 @@
             <select id="residential_company_filter" name="residential_company_filter" class="mt-1 block w-full">
                 <option value="">{{ __('Všetky bytové podniky') }}</option>
                 @foreach($residentialCompanies as $residentialCompany)
-                    <option value="{{ $residentialCompany->id }}">{{ $residentialCompany->name }}</option>
+                    <option value="{{ $residentialCompany->id }}" {{ request('residential_company_filter') == $residentialCompany->id ? 'selected' : '' }}>{{ $residentialCompany->name }}</option>
                 @endforeach
             </select>
         </div>
@@ -47,10 +47,10 @@
 
     <!-- State Filter Buttons -->
     <div class="mb-4 flex justify-center space-x-4">
-        <button data-state="created" class="state-filter-button bg-blue-700 text-white py-2 px-4 rounded active">{{ __('Vytvorené') }}</button>
-        <button data-state="sent" class="state-filter-button bg-blue-500 text-white py-2 px-4 rounded">{{ __('Odoslané') }}</button>
-        <button data-state="expired" class="state-filter-button bg-blue-500 text-white py-2 px-4 rounded">{{ __('Po splatnosti') }}</button>
-        <button data-state="paid" class="state-filter-button bg-blue-500 text-white py-2 px-4 rounded">{{ __('Zaplatené') }}</button>
+        <a href="{{ route('invoices.index', array_merge(request()->query(), ['filter' => 'created'])) }}" class="state-filter-button {{ request('filter', 'created') == 'created' ? 'bg-blue-700' : 'bg-blue-500' }} text-white py-2 px-4 rounded">{{ __('Vytvorené') }}</a>
+        <a href="{{ route('invoices.index', array_merge(request()->query(), ['filter' => 'sent'])) }}" class="state-filter-button {{ request('filter') == 'sent' ? 'bg-blue-700' : 'bg-blue-500' }} text-white py-2 px-4 rounded">{{ __('Odoslané') }}</a>
+        <a href="{{ route('invoices.index', array_merge(request()->query(), ['filter' => 'expired'])) }}" class="state-filter-button {{ request('filter') == 'expired' ? 'bg-blue-700' : 'bg-blue-500' }} text-white py-2 px-4 rounded">{{ __('Po splatnosti') }}</a>
+        <a href="{{ route('invoices.index', array_merge(request()->query(), ['filter' => 'paid'])) }}" class="state-filter-button {{ request('filter') == 'paid' ? 'bg-blue-700' : 'bg-blue-500' }} text-white py-2 px-4 rounded">{{ __('Zaplatené') }}</a>
     </div>
 
     <!-- Select Button and Search Box -->
@@ -58,36 +58,39 @@
         <button id="toggle-select" class="bg-blue-500 text-white py-2 px-4 rounded">{{ __('Označiť faktúry') }}</button>
 
         <!-- Search box for filtering by 'Miesto' -->
-        <input type="text" id="search-box" placeholder="Hľadať podľa miesta..." class="border rounded py-2 px-4 w-1/3">
+        <input type="text" id="search-box" placeholder="Hľadať podľa miesta..." class="border rounded py-2 px-4 w-1/3" value="{{ request('search') }}">
     </div>
 
     <!-- Invoice Table -->
     <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg p-6">
-        <!-- Hlavný formulár pre bulk akcie -->
         <form id="bulk-action-form" method="POST" action="{{ route('invoices.bulk_action') }}">
             @csrf
             <input type="hidden" id="bulk-action-input" name="bulk_action" value="">
             <input type="hidden" id="selected_invoices_input" name="selected_invoices_list" value="">
-            <input type="hidden" id="filter-input" name="filter" value="{{ $filter }}"> <!-- Skrytý input pre filter -->
 
             <!-- Počet zobrazených faktúr na stránku -->
             <div class="mb-4">
                 <label for="items-per-page" class="text-white">{{ __('Počet faktúr na stránku:') }}</label>
-                <select id="items-per-page" class="ml-2 border rounded text-black">
-                    <option value="10" {{ $perPage == 10 ? 'selected' : '' }}>10</option>
-                    <option value="25" {{ $perPage == 25 ? 'selected' : '' }}>25</option>
-                    <option value="50" {{ $perPage == 50 ? 'selected' : '' }}>50</option>
-                    <option value="100" {{ $perPage == 100 ? 'selected' : '' }}>100</option>
+                <select id="items-per-page" name="perPage" class="ml-2 border rounded text-black">
+                    <option value="10" {{ request('perPage') == 10 ? 'selected' : '' }}>10</option>
+                    <option value="25" {{ request('perPage') == 25 ? 'selected' : '' }}>25</option>
+                    <option value="50" {{ request('perPage') == 50 ? 'selected' : '' }}>50</option>
+                    <option value="100" {{ request('perPage') == 100 ? 'selected' : '' }}>100</option>
                 </select>
             </div>
 
             <table class="min-w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg">
                 <thead>
                     <tr class="bg-gray-200 dark:bg-gray-700">
-                        <th class="px-4 py-2">
-                            <input type="checkbox" id="select-all" class="hidden">
+                        <th class="px-4 py-2"><input type="checkbox" id="select-all" class="hidden"></th>
+                        <th class="px-4 py-2 cursor-pointer">
+                            <a href="{{ route('invoices.index', array_merge(request()->query(), ['sortBy' => 'invoice_number', 'sortDirection' => request('sortDirection', 'asc') == 'asc' ? 'desc' : 'asc'])) }}">
+                                {{ __('Číslo faktúry') }}
+                                @if(request('sortBy') == 'invoice_number')
+                                    {{ request('sortDirection', 'asc') == 'asc' ? '▲' : '▼' }}
+                                @endif
+                            </a>
                         </th>
-                        <th class="px-4 py-2 cursor-pointer" id="invoice-number-header">{{ __('Číslo faktúry') }} ▲</th>
                         <th class="px-4 py-2">{{ __('Firma') }}</th>
                         <th class="px-4 py-2">{{ __('Bytový podnik') }}</th>
                         <th class="px-4 py-2">{{ __('Miesto') }}</th>
@@ -98,7 +101,7 @@
                 </thead>
                 <tbody id="invoice-list">
                     @foreach($invoices as $invoice)
-                    <tr class="hover:bg-gray-100 dark:hover:bg-gray-700" data-company="{{ $invoice->company_id }}" data-residential="{{ $invoice->residential_company_id }}" data-state="{{ $invoice->status }}" data-invoice-number="{{ $invoice->invoice_number }}">
+                    <tr class="hover:bg-gray-100 dark:hover:bg-gray-700">
                         <td class="px-4 py-2">
                             <input type="checkbox" name="selected_invoices[]" value="{{ $invoice->id }}" class="invoice-checkbox hidden">
                         </td>
@@ -119,17 +122,8 @@
 
             <!-- Pagination Container -->
             <div id="pagination-container" class="mt-4 flex justify-center">
-                {{ $invoices->links() }}
+                {{ $invoices->appends(request()->query())->links() }}
             </div>
-
-            <!-- Bulk Action Buttons -->
-            <div class="mt-4 space-x-4 text-center">
-                <button type="button" onclick="setBulkAction('mark_sent')" class="bg-green-500 text-white py-2 px-4 rounded hidden" id="mark-sent">{{ __('Označiť ako odoslané') }}</button>
-                <button type="button" onclick="openPaymentDateModal()" class="bg-yellow-500 text-white py-2 px-4 rounded hidden" id="mark-paid">{{ __('Označiť ako zaplatené') }}</button>
-                <button type="button" onclick="setBulkAction('delete_selected')" class="bg-red-500 text-white py-2 px-4 rounded hidden" id="delete-selected">{{ __('Vymazať označené') }}</button>
-                <button type="button" onclick="setBulkAction('download_selected')" class="bg-blue-500 text-white py-2 px-4 rounded hidden" id="download-selected">{{ __('Stiahnuť označené') }}</button>
-            </div>
-            
             <!-- Payment Date Modal -->
             <div id="payment-date-modal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
                 <div class="bg-white p-6 rounded-lg shadow-lg w-96">
@@ -142,207 +136,126 @@
                     </div>
                 </div>
             </div>
+            <!-- Bulk Action Buttons -->
+            <div class="mt-4 space-x-4 text-center">
+                <button type="button" onclick="setBulkAction('mark_sent')" class="bg-green-500 text-white py-2 px-4 rounded hidden" id="mark-sent">{{ __('Označiť ako odoslané') }}</button>
+                <button type="button" onclick="openPaymentDateModal()" class="bg-yellow-500 text-white py-2 px-4 rounded hidden" id="mark-paid">{{ __('Označiť ako zaplatené') }}</button>
+                <button type="button" onclick="setBulkAction('delete_selected')" class="bg-red-500 text-white py-2 px-4 rounded hidden" id="delete-selected">{{ __('Vymazať označené') }}</button>
+                <button type="button" onclick="setBulkAction('download_selected')" class="bg-blue-500 text-white py-2 px-4 rounded hidden" id="download-selected">{{ __('Stiahnuť označené') }}</button>
+            </div>
         </form>
     </div>
 </div>
 
-<!-- JavaScript for search, toggle, filter, and sort functionality -->
-
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        let urlParams = new URLSearchParams(window.location.search);
-        let currentState = urlParams.get('filter') || 'created';  // Default state filter to 'created'
-        let sortDirection = 'asc';  // Default sort direction
+   // Handle bulk actions - Toggle checkboxes and show/hide bulk action buttons
+document.getElementById('toggle-select').addEventListener('click', function() {
+    // Toggle visibility of checkboxes
+    document.querySelectorAll('.invoice-checkbox').forEach(checkbox => {
+        checkbox.classList.toggle('hidden');
+    });
 
-        // Apply initial filter state from URL
-        filterInvoices(currentState);
-        setActiveButton(currentState);
+    // Toggle visibility of bulk action buttons
+    document.getElementById('mark-sent').classList.toggle('hidden');
+    document.getElementById('mark-paid').classList.toggle('hidden');
+    document.getElementById('delete-selected').classList.toggle('hidden');
+    document.getElementById('download-selected').classList.toggle('hidden');
+});
 
-        // Search box functionality for filtering by "Miesto" while respecting active state
-        const searchBox = document.getElementById('search-box');
-        const invoiceList = document.getElementById('invoice-list');
+// Handle select-all checkbox functionality
+document.getElementById('select-all').addEventListener('change', function() {
+    document.querySelectorAll('.invoice-checkbox').forEach(checkbox => {
+        checkbox.checked = this.checked;
+    });
+});
 
-        searchBox.addEventListener('keyup', function() {
-            const searchTerm = searchBox.value.toLowerCase();
-            filterInvoices(currentState, searchTerm);
-        });
+document.getElementById('company_filter').addEventListener('change', function() {
+    let url = new URL(window.location.href);
+    url.searchParams.set('company_filter', this.value);
+    window.location.href = url.href;
+});
 
-        // Toggle checkboxes
-        document.getElementById('toggle-select').addEventListener('click', function() {
-            document.querySelectorAll('.invoice-checkbox').forEach(checkbox => {
-                checkbox.classList.toggle('hidden');
-            });
-            document.getElementById('mark-sent').classList.toggle('hidden');
-            document.getElementById('mark-paid').classList.toggle('hidden');
-            document.getElementById('delete-selected').classList.toggle('hidden');
-            document.getElementById('download-selected').classList.toggle('hidden');
-            document.getElementById('select-all').classList.toggle('hidden');
-        });
+document.getElementById('residential_company_filter').addEventListener('change', function() {
+    let url = new URL(window.location.href);
+    url.searchParams.set('residential_company_filter', this.value);
+    window.location.href = url.href;
+});
 
-        // Select all checkboxes for visible rows
-        document.getElementById('select-all').addEventListener('change', function() {
-            let checkboxes = document.querySelectorAll('#invoice-list tr:not([style*="display: none"]) .invoice-checkbox');
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = this.checked;
-            });
-        });
+// Define the function to handle bulk actions
+function setBulkAction(action) {
+    // Set the bulk action value
+    document.getElementById('bulk-action-input').value = action;
 
-        // State Filter Buttons
-        document.querySelectorAll('.state-filter-button').forEach(button => {
-            button.addEventListener('click', function() {
-                let selectedState = this.getAttribute('data-state');
-                currentState = selectedState;  // Update current state
-                filterInvoices(currentState, searchBox.value.toLowerCase());  // Reapply filtering based on the new state and current search term
-                setActiveButton(currentState);
-                let url = new URL(window.location.href);
-                url.searchParams.set('filter', currentState);
-                window.history.pushState({}, '', url);
-                window.location.reload(); 
-            });
-        });
+    // Collect selected invoices
+    let selectedInvoices = [];
+    document.querySelectorAll('.invoice-checkbox:checked').forEach(function(checkbox) {
+        selectedInvoices.push(checkbox.value);
+    });
 
-        // Company Filter Dropdown
-        document.getElementById('company_filter').addEventListener('change', function() {
-            filterInvoices(currentState, searchBox.value.toLowerCase());
-        });
+    if (selectedInvoices.length > 0) {
+        document.getElementById('selected_invoices_input').value = JSON.stringify(selectedInvoices);
 
-        // Residential Company Filter Dropdown
-        document.getElementById('residential_company_filter').addEventListener('change', function() {
-            filterInvoices(currentState, searchBox.value.toLowerCase());
-        });
-
-        // Sorting by Invoice Number
-        document.getElementById('invoice-number-header').addEventListener('click', function() {
-            sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
-            sortInvoicesByNumber(sortDirection);
-        });
-
-        // Change the number of items per page
-        document.getElementById('items-per-page').addEventListener('change', function() {
-            let url = new URL(window.location.href);
-            url.searchParams.set('perPage', this.value);
-            window.location.href = url.href;
-        });
-
-        // Filtering function that respects both state, search term, and filters
-        function filterInvoices(state, searchTerm = '') {
-            const selectedCompany = document.getElementById('company_filter').value;
-            const selectedResidentialCompany = document.getElementById('residential_company_filter').value;
-
-            document.querySelectorAll('#invoice-list tr').forEach(row => {
-                const placeColumn = row.querySelector('.place-column').textContent.toLowerCase();
-                const rowState = row.getAttribute('data-state');
-                const rowCompany = row.getAttribute('data-company');
-                const rowResidential = row.getAttribute('data-residential');
-
-                // Show the row only if it matches the current state, search term, and filters
-                const matchesState = rowState === state;
-                const matchesSearch = placeColumn.includes(searchTerm);
-                const matchesCompany = !selectedCompany || rowCompany === selectedCompany;
-                const matchesResidential = !selectedResidentialCompany || rowResidential === selectedResidentialCompany;
-
-                if (matchesState && matchesSearch && matchesCompany && matchesResidential) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        }
-
-        // Set active button style for the current filter state
-        function setActiveButton(state) {
-            document.querySelectorAll('.state-filter-button').forEach(button => {
-                if (button.getAttribute('data-state') === state) {
-                    button.classList.remove('bg-blue-500');
-                    button.classList.add('bg-blue-700');
-                } else {
-                    button.classList.remove('bg-blue-700');
-                    button.classList.add('bg-blue-500');
-                }
-            });
-        }
-
-        // Sort invoices by number
-        function sortInvoicesByNumber(direction) {
-            const rowsArray = Array.from(invoiceList.querySelectorAll('tr'));
-
-            rowsArray.sort((a, b) => {
-                const aNumber = parseInt(a.getAttribute('data-invoice-number'), 10);
-                const bNumber = parseInt(b.getAttribute('data-invoice-number'), 10);
-
-                return direction === 'asc' ? aNumber - bNumber : bNumber - aNumber;
-            });
-
-            // Clear and re-append sorted rows
-            invoiceList.innerHTML = '';
-            rowsArray.forEach(row => {
-                invoiceList.appendChild(row);
-            });
-
-            // Update sort indicator
-            document.getElementById('invoice-number-header').textContent = `Číslo faktúry ${direction === 'asc' ? '▲' : '▼'}`;
-        }
-
-        // Set bulk action based on selected invoices
-        window.setBulkAction = function(action) {
-            document.getElementById('bulk-action-input').value = action;
-
-            let selectedInvoices = [];
-            document.querySelectorAll('#invoice-list tr:not([style*="display: none"]) .invoice-checkbox:checked').forEach(function (checkbox) {
-                selectedInvoices.push(checkbox.value);
-            });
-
-            if (selectedInvoices.length > 0) {
-                document.getElementById('selected_invoices_input').value = JSON.stringify(selectedInvoices);
-
-                if (action === 'mark_paid') {
-                    // Open the payment date modal instead of submitting the form immediately
-                    openPaymentDateModal();
-                } else {
-                    // Submit form for other actions
-                    document.getElementById('bulk-action-form').submit();
-                }
-            } else {
-                alert('{{ __("Please select at least one invoice.") }}');
-            }
-        }
-
-        // Open the Payment Date Modal
-        window.openPaymentDateModal = function() {
-            document.getElementById('payment-date-modal').classList.remove('hidden');
-        }
-
-        // Confirm and Set Payment Date, then submit the form
-        window.confirmPaymentDate = function() {
-            let paymentDate = document.getElementById('modal-payment-date').value;
-            
-            // Set the bulk action to 'mark_paid'
-            document.getElementById('bulk-action-input').value = 'mark_paid';
-            
-            // Ensure that selected invoices are correctly populated
-            let selectedInvoices = [];
-            document.querySelectorAll('#invoice-list .invoice-checkbox:checked').forEach(function (checkbox) {
-                selectedInvoices.push(checkbox.value);
-            });
-            
-            // Set the selected invoices list
-            document.getElementById('selected_invoices_input').value = JSON.stringify(selectedInvoices);
-            
-            // Create a hidden input field for the payment date and append it to the form
-            let paymentDateInput = document.createElement('input');
-            paymentDateInput.type = 'hidden';
-            paymentDateInput.name = 'payment_date';
-            paymentDateInput.value = paymentDate;
-            document.getElementById('bulk-action-form').appendChild(paymentDateInput);
-            
-            // Now submit the form
+        if (action === 'mark_paid') {
+            // Open the payment date modal for the 'mark_paid' action
+            openPaymentDateModal();
+        } else {
+            // Submit the form for other actions
             document.getElementById('bulk-action-form').submit();
         }
+    } else {
+        alert('Prosím, vyberte aspoň jednu faktúru.');
+    }
+}
 
-        // Close Payment Date Modal
-        window.closePaymentDateModal = function() {
-            document.getElementById('payment-date-modal').classList.add('hidden');
-        }
+
+// Handle changing the number of items per page
+document.getElementById('items-per-page').addEventListener('change', function() {
+    let url = new URL(window.location.href);
+    url.searchParams.set('perPage', this.value);
+    window.location.href = url.href;
+});
+
+// Handle search functionality for places
+document.getElementById('search-box').addEventListener('keyup', function(event) {
+    let url = new URL(window.location.href);
+    url.searchParams.set('search', this.value);
+    window.location.href = url.href;
+});
+
+function openPaymentDateModal() {
+    document.getElementById('payment-date-modal').classList.remove('hidden');
+}
+
+// Define the function to close the payment date modal
+function closePaymentDateModal() {
+    document.getElementById('payment-date-modal').classList.add('hidden');
+}
+
+// Confirm and Set Payment Date, then submit the form
+function confirmPaymentDate() {
+    let paymentDate = document.getElementById('modal-payment-date').value;
+
+    // Set the bulk action to 'mark_paid'
+    document.getElementById('bulk-action-input').value = 'mark_paid';
+
+    // Collect selected invoices
+    let selectedInvoices = [];
+    document.querySelectorAll('.invoice-checkbox:checked').forEach(function(checkbox) {
+        selectedInvoices.push(checkbox.value);
     });
+
+    // Set the selected invoices list
+    document.getElementById('selected_invoices_input').value = JSON.stringify(selectedInvoices);
+
+    // Create a hidden input field for the payment date and append it to the form
+    let paymentDateInput = document.createElement('input');
+    paymentDateInput.type = 'hidden';
+    paymentDateInput.name = 'payment_date';
+    paymentDateInput.value = paymentDate;
+    document.getElementById('bulk-action-form').appendChild(paymentDateInput);
+
+    // Submit the form
+    document.getElementById('bulk-action-form').submit();
+}
 </script>
 @endsection
