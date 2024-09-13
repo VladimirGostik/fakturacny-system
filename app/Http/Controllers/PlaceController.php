@@ -34,6 +34,14 @@ class PlaceController extends Controller
         // Vytvorenie novej ulice
         $place = Place::create($validatedData);
 
+        foreach ($request->service_description as $index => $description) {
+            Service::create([
+                'place_id' => $place->id,
+                'service_description' => $description,
+                'service_price' => $request->service_price[$index],
+            ]);
+        }
+
         return redirect()->route('places.index')->with('status', 'Ulica bola úspešne vytvorená!');
     }
 
