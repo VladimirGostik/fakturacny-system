@@ -151,6 +151,13 @@
    // Handle bulk actions - Toggle checkboxes and show/hide bulk action buttons
 document.getElementById('toggle-select').addEventListener('click', function() {
     // Toggle visibility of checkboxes
+    let anyCheckboxVisible = Array.from(document.querySelectorAll('.invoice-checkbox')).some(checkbox => !checkbox.classList.contains('hidden'));
+
+    if (!anyCheckboxVisible) {
+        document.getElementById('select-all').classList.remove('hidden');
+    } else {
+        document.getElementById('select-all').classList.add('hidden');
+    }    
     document.querySelectorAll('.invoice-checkbox').forEach(checkbox => {
         checkbox.classList.toggle('hidden');
     });
