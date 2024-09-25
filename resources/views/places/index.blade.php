@@ -71,7 +71,7 @@
                             </div>
                             <div>
                                 <x-input-label for="service_price[]" :value="__('Cena služby')" />
-                                <input type="number" name="service_price[]" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-lg" required />
+                                <input type="text" name="service_price[]" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-lg" required />
                             </div>
                         </div>
                     </div>
@@ -306,7 +306,7 @@
                 </div>
                 <div>
                     <x-input-label for="service_price[]" :value="__('Cena služby')" />
-                    <input type="number" name="service_price[]" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-lg" required />
+                    <input type="text" name="service_price[]" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-lg" required />
                 </div>
             </div>
         `;
