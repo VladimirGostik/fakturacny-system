@@ -347,6 +347,7 @@
                     newStreetContainer.classList.add('hidden');
                     newStreetField.value = "";  // Clear the new street field
                     headerField.value = selectedPlace.header || "";  // Fill the header with the selected place's header
+                    document.getElementById('desc_above_service').value = selectedPlace.desc_above_service || "";  // Fill desc_above_service
 
                     // Check if the selected place has services
                     if (selectedPlace.services && selectedPlace.services.length > 0) {
