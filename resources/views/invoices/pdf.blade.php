@@ -169,7 +169,6 @@
                 <p class="info-text">{{ $invoice->company->city }}, {{ $invoice->company->postal_code }}</p>
                 <p class="info-text">{{ __('IČO:') }} {{ $invoice->company->ico }}</p>
                 <p class="info-text">{{ __('DIČ:') }} {{ $invoice->company->dic }}</p>
-                <p class="info-text">{{ __('IBAN:') }} {{ $invoice->company->iban }}</p>
             </div>
 
             <div class="client-info">
@@ -203,7 +202,9 @@
                 @if(!empty($invoice->residential_company_ic_dph))
                     <p class="info-text">{{ __('IČ DPH:') }} {{ $invoice->residential_company_ic_dph }}</p>
                 @endif
-        
+                @if(!empty($invoice->residential_company_iban))
+                <p class="info-text">{{ __('IBAN:') }} {{ $invoice->residential_company_iban }}</p>
+            @endif
             </div>
         </div>
 
