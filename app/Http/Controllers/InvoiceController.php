@@ -151,96 +151,106 @@ class InvoiceController extends Controller
             return redirect()->route('invoices.show', $invoice)->with('status', 'Faktúra bola úspešne aktualizovaná!');
         }
 
-public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'company_id' => 'required|exists:companies,id',
-            'residential_company_id' => 'required|exists:residential_companies,id',
-            'residential_company_name' => 'required|string|max:255',
-            'residential_company_address' => 'required|string|max:255',
-            'residential_company_city' => 'required|string|max:255',
-            'residential_company_postal_code' => 'required|string|max:255',
-            'residential_company_ico' => 'nullable|string|max:255',
-            'residential_company_dic' => 'nullable|string|max:255',
-            'residential_company_ic_dph' => 'nullable|string|max:255',
-            'residential_company_iban' => 'nullable|string|max:255',
-            'residential_company_bank_connection' => 'nullable|string|max:255',
-            'issue_date' => 'required|date',
-            'due_date' => 'required|date',
-            'billing_month' => 'required|string',
-            'services' => 'sometimes|array',
-            'services.*.description' => 'required_with:services|string|max:255',
-            'services.*.price' => 'required_with:services|numeric|min:0',
-            'new_street' => 'nullable|string|max:255',
-            'existing_place' => 'nullable|exists:places,id',
-            'header' => 'nullable|string|max:255',
-            'invoice_type' => [
-                'required',
-                Rule::in([
-                    'Hlavicka-Adresa-Nazov',
-                    'Nazov-Adresa-Hlavicka',
-                    'Hlavicka-Nazov-Adresa',
-                    'Nazov-Hlavicka-Adresa',
-                    'Adresa-Nazov-Hlavicka',
-                    'Adresa-Hlavicka-Nazov'
-                ]),
-            ],
-        ]);
-
-        if ($request['auto_generate'] === 'true') {
-            $invoiceNumber = $this->generateInvoiceNumber($validated['company_id'], $validated['billing_month'], $validated['issue_date']);
-        } else {
+        public function store(Request $request)
+        {
+            // Validate general inputs
             $validated = $request->validate([
-                'invoice_number' => [
+                'company_id' => 'required|exists:companies,id',
+                'residential_company_id' => 'required|exists:residential_companies,id',
+                'residential_company_name' => 'required|string|max:255',
+                'residential_company_address' => 'required|string|max:255',
+                'residential_company_city' => 'required|string|max:255',
+                'residential_company_postal_code' => 'required|string|max:255',
+                'residential_company_ico' => 'nullable|string|max:255',
+                'residential_company_dic' => 'nullable|string|max:255',
+                'residential_company_ic_dph' => 'nullable|string|max:255',
+                'residential_company_iban' => 'nullable|string|max:255',
+                'residential_company_bank_connection' => 'nullable|string|max:255',
+                'issue_date' => 'required|date',
+                'due_date' => 'required|date',
+                'billing_month' => 'required|string',
+                'services' => 'sometimes|array',
+                'services.*.description' => 'required_with:services|string|max:255',
+                'services.*.price' => 'required_with:services|numeric|min:0',
+                'new_street' => 'nullable|string|max:255',
+                'existing_place' => 'nullable|exists:places,id',
+                'header' => 'nullable|string|max:255',
+                'invoice_type' => [
                     'required',
-                    'string',
-                    'max:255',
-                    Rule::unique('invoices')->where(function ($query) use ($request) {
-                        return $query->where('company_id', $request->company_id)
-                            ->where('invoice_number', $request->invoice_number);
-                    }),
+                    Rule::in([
+                        'Hlavicka-Adresa-Nazov',
+                        'Nazov-Adresa-Hlavicka',
+                        'Hlavicka-Nazov-Adresa',
+                        'Nazov-Hlavicka-Adresa',
+                        'Adresa-Nazov-Hlavicka',
+                        'Adresa-Hlavicka-Nazov'
+                    ]),
                 ],
             ]);
-            $invoiceNumber = $request['invoice_number'];
-        }
-
-        $invoice = Invoice::create([
-            'invoice_number' => $invoiceNumber,
-            'company_id' => $validated['company_id'],
-            'residential_company_id' => $validated['residential_company_id'],
-            'residential_company_name' => $validated['residential_company_name'],
-            'residential_company_address' => $validated['residential_company_address'],
-            'residential_company_city' => $validated['residential_company_city'],
-            'residential_company_postal_code' => $validated['residential_company_postal_code'],
-            'residential_company_ico' => $validated['residential_company_ico'],
-            'residential_company_dic' => $validated['residential_company_dic'],
-            'residential_company_ic_dph' => $validated['residential_company_ic_dph'],
-            'residential_company_iban' => $validated['residential_company_iban'],
-            'residential_company_bank_connection' => $validated['residential_company_bank_connection'],
-            'issue_date' => $validated['issue_date'],
-            'due_date' => $validated['due_date'],
-            'billing_month' => $validated['billing_month'],
-            'invoice_type' => $validated['invoice_type'],
-        ]);
-
-        $placeName = $validated['new_street'] ?: Place::find($validated['existing_place'])->name;
-
-        if (isset($validated['services'])) {
-            foreach ($validated['services'] as $serviceData) {
-                InvoiceService::create([
-                    'invoice_id' => $invoice->id,
-                    'service_description' => $serviceData['description'],
-                    'service_price' => $serviceData['price'],
-                    'place_name' => $placeName,
-                    'place_header' => $validated['header'],
-                    'desc_above_service' => $request['desc_above_service'],
+        
+            // Handle invoice number logic
+            if ($request->input('auto_generate') === 'true') {
+                $invoiceNumber = $this->generateInvoiceNumber(
+                    $validated['company_id'], 
+                    $validated['billing_month'], 
+                    $validated['issue_date']
+                );
+            } else {
+                // Validate manual invoice number
+                $validatedInvoice = $request->validate([
+                    'invoice_number' => [
+                        'required',
+                        'string',
+                        'max:255',
+                        Rule::unique('invoices')->where(function ($query) use ($request) {
+                            return $query->where('company_id', $request->company_id)
+                                ->where('invoice_number', $request->invoice_number);
+                        }),
+                    ],
                 ]);
+                $invoiceNumber = $validatedInvoice['invoice_number'];
             }
+        
+            // Create the invoice
+            $invoice = Invoice::create([
+                'invoice_number' => $invoiceNumber,
+                'company_id' => $validated['company_id'],
+                'residential_company_id' => $validated['residential_company_id'],
+                'residential_company_name' => $validated['residential_company_name'],
+                'residential_company_address' => $validated['residential_company_address'],
+                'residential_company_city' => $validated['residential_company_city'],
+                'residential_company_postal_code' => $validated['residential_company_postal_code'],
+                'residential_company_ico' => $validated['residential_company_ico'],
+                'residential_company_dic' => $validated['residential_company_dic'],
+                'residential_company_ic_dph' => $validated['residential_company_ic_dph'],
+                'residential_company_iban' => $validated['residential_company_iban'],
+                'residential_company_bank_connection' => $validated['residential_company_bank_connection'],
+                'issue_date' => $validated['issue_date'],
+                'due_date' => $validated['due_date'],
+                'billing_month' => $validated['billing_month'],
+                'invoice_type' => $validated['invoice_type'],
+            ]);
+        
+            // Determine place name
+            $placeName = $validated['new_street'] ?: Place::find($validated['existing_place'])->name;
+        
+            // Handle services
+            if (isset($validated['services'])) {
+                foreach ($validated['services'] as $serviceData) {
+                    InvoiceService::create([
+                        'invoice_id' => $invoice->id,
+                        'service_description' => $serviceData['description'],
+                        'service_price' => $serviceData['price'],
+                        'place_name' => $placeName,
+                        'place_header' => $validated['header'],
+                        'desc_above_service' => $request->input('desc_above_service'),
+                    ]);
+                }
+            }
+        
+            return redirect()->route('invoices.index')->with('status', 'Faktúra bola úspešne vytvorená!');
         }
-
-        return redirect()->route('invoices.index')->with('status', 'Faktúra bola úspešne vytvorená!');
-    }
-
+        
 
 public function destroy($id)
 {
