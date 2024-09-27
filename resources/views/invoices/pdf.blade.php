@@ -183,7 +183,7 @@
                     @if($invoice->services->isNotEmpty() && !empty($invoice->services->first()->place_header))
                         <p class="info-text">{{ $invoice->services->first()->place_header }}</p>
                     @else
-                        <p class="info-text">{{ __('Ziadna hlavicka nie je dostupna') }}</p>
+                        <p class="info-text">{{ __('') }}</p>
                     @endif
                 @elseif($item == 'Nazov') <!-- Názov -->
                     <p class="info-text"><strong>{{ $invoice->residential_company_name }}</strong></p>
@@ -204,9 +204,6 @@
                     <p class="info-text">{{ __('IČ DPH:') }} {{ $invoice->residential_company_ic_dph }}</p>
                 @endif
         
-                @if(!empty($invoice->residential_company_iban))
-                    <p class="info-text">{{ __('IBAN:') }} {{ $invoice->residential_company_iban }}</p>
-                @endif
             </div>
         </div>
 

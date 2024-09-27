@@ -68,9 +68,10 @@ class InvoiceController extends Controller
 
     public function show(Invoice $invoice)
         {
+            //dd($invoice->all());
             // Return a view with the invoice details
             return view('invoices.show', compact('invoice'));
-        }
+    }
 
         public function edit(Invoice $invoice)
         {
