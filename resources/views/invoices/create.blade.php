@@ -196,7 +196,7 @@
                     <textarea id="header" name="header" class="mt-1 block w-full"></textarea>
                 </div>
                 <div> <!-- Pridanie poľa pre popis nad služby -->
-                    <x-input-label for="desc_above_service" :value="__('Popis nad služby')" class="text-lg" />
+                    <x-input-label for="desc_above_service" :value="__('Popis nad služby: Pre vlozenie datumu vloz: {mesiac} alebo {mesiac/rok}')" class="text-lg" />
                     <textarea id="desc_above_service" name="desc_above_service" class="mt-1 block w-full"></textarea>
                 </div>
             </div>

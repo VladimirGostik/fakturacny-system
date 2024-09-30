@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Place;
 use App\Models\ResidentialCompany;
 use App\Models\Service;
+use App\Models\Company;
 use Illuminate\Http\Request;
+use PDF;
+
 
 class PlaceController extends Controller
 {
@@ -15,6 +18,14 @@ class PlaceController extends Controller
         $places = Place::with('services')->get(); // Všetky miesta so službami
         return view('places.index', compact('residential_companies', 'places'));
     }
+
+    public function edit($id)
+    {
+        $place = Place::findOrFail($id);
+        $residentialCompanies = ResidentialCompany::all(); // Načítanie všetkých bytových podnikov, ak ich potrebujete na úpravu
+        return view('places.edit', compact('place', 'residentialCompanies'));
+    }
+
 
     public function create()
     {
@@ -29,6 +40,15 @@ class PlaceController extends Controller
             'residential_company_id' => 'required|exists:residential_companies,id',
             'header' => 'nullable|string',
             'desc_above_service' => 'nullable|string|max:255',
+            'residential_company_address' => 'nullable|string|max:255',
+            'residential_company_city' => 'nullable|string|max:255',
+            'residential_company_postal_code' => 'nullable|string|max:255',
+            'residential_company_ico' => 'nullable|string|max:255',
+            'residential_company_dic' => 'nullable|string|max:255',
+            'residential_company_ic_dph' => 'nullable|string|max:255',
+            'residential_company_iban' => 'nullable|string|max:255',
+            'residential_company_bank_connection' => 'nullable|string|max:255',
+            'invoice_type' => 'required|string|max:255',
         ]);
 
         // Vytvorenie novej ulice
@@ -45,18 +65,21 @@ class PlaceController extends Controller
         return redirect()->route('places.index')->with('status', 'Ulica bola úspešne vytvorená!');
     }
 
-    public function edit(Place $place)
-    {
-        $residentialCompanies = ResidentialCompany::all();
-        return view('places.edit', compact('place', 'residentialCompanies'));
-    }
-
     public function update(Request $request, $id)
     {
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'header' => 'nullable|string',
             'desc_above_service' => 'nullable|string|max:255',
+            'residential_company_address' => 'nullable|string|max:255',
+            'residential_company_city' => 'nullable|string|max:255',
+            'residential_company_postal_code' => 'nullable|string|max:255',
+            'residential_company_ico' => 'nullable|string|max:255',
+            'residential_company_dic' => 'nullable|string|max:255',
+            'residential_company_ic_dph' => 'nullable|string|max:255',
+            'residential_company_iban' => 'nullable|string|max:255',
+            'residential_company_bank_connection' => 'nullable|string|max:255',
+            'invoice_type' => 'required|string|max:255',
         ]);
 
         $place = Place::find($id);
@@ -73,5 +96,45 @@ class PlaceController extends Controller
         $place->delete();
 
         return redirect()->route('places.index')->with('status', 'Ulica bola úspešne vymazaná!');
+    }
+
+    public function generateInvoice($id)
+    {
+        // Načítanie ulice so službami a bytovým podnikom
+        $place = Place::with(['services', 'residentialCompany'])->findOrFail($id);
+
+        // Predpokladáme, že máte autentifikovaného používateľa a priradenú spoločnosť
+        $user = auth()->user();
+        $company = $place->residentialCompany->company;
+
+
+        // Generovanie jedinečného čísla faktúry (napr. pomocou ID a aktuálneho času)
+        $invoiceNumber = 'F' . strtoupper(uniqid());
+
+        // Vytvorenie dát pre faktúru
+        $invoice = (object) [
+            'invoice_number' => $invoiceNumber,
+            'billing_month' => now()->format('F Y'),
+            'issue_date' => now()->format('d-m-Y'),
+            'due_date' => now()->addDays(30)->format('d-m-Y'),
+            'company' => $company,
+            'services' => $place->services,
+            'invoice_type' => $place->invoice_type,
+            'residential_company_name' => $place->residentialCompany->name,
+            'residential_company_address' => $place->residentialCompany->address,
+            'residential_company_postal_code' => $place->residentialCompany->postal_code,
+            'residential_company_city' => $place->residentialCompany->city,
+            'residential_company_ico' => $place->residentialCompany->ico,
+            'residential_company_dic' => $place->residentialCompany->dic,
+            'residential_company_ic_dph' => $place->residentialCompany->ic_dph,
+            'residential_company_iban' => $place->residentialCompany->iban,
+            'residential_company_bank_connection' => $place->residentialCompany->bank_connection,
+        ];
+
+        // Generovanie PDF z Blade šablóny
+        $pdf = \PDF::loadView('invoices.invoice', compact('invoice', 'user'));
+
+        // Návrat PDF ako stream
+        return $pdf->inline('faktura_' . $invoiceNumber . '.pdf');
     }
 }

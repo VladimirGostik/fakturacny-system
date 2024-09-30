@@ -308,9 +308,6 @@ public function generateMonthlyInvoices(Request $request)
                 ->orderBy('issue_date', 'desc')
                 ->first();
 
-            // Ak existuje posledná faktúra, použijeme jej typ, inak nastavíme predvolený typ
-            $invoiceType = $lastInvoice ? $lastInvoice->invoice_type : 'Hlavicka-Adresa-Nazov';
-
             // Vytvoríme nové číslo faktúry
             $newInvoiceNumber = $this->generateInvoiceNumber($company->id, $billingMonth, $issueDate);
 
@@ -319,14 +316,19 @@ public function generateMonthlyInvoices(Request $request)
                 'invoice_number' => $newInvoiceNumber,
                 'company_id' => $company->id,
                 'residential_company_id' => $residentialCompany->id,
-                'residential_company_name' => $residentialCompany->name,
-                'residential_company_address' => $residentialCompany->address,
-                'residential_company_city' => $residentialCompany->city,
-                'residential_company_postal_code' => $residentialCompany->postal_code,
+                'residential_company_name' => $place->residential_company_name,
+                'residential_company_address' => $place->residential_company_address,
+                'residential_company_city' => $place->residential_company_city,
+                'residential_company_postal_code' => $place->residential_company_postal_code,
+                'residential_company_ico' => $place->residential_company_ico,
+                'residential_company_dic' => $place->residential_company_dic,
+                'residential_company_ic_dph' => $place->residential_company_ic_dph,
+                'residential_company_iban' => $place->residential_company_iban,
+                'residential_company_bank_connection' => $place->residential_company_bank_connection,
                 'issue_date' => $issueDate,
                 'due_date' => $dueDate,
                 'billing_month' => $billingMonth,
-                'invoice_type' => $invoiceType,  // Nastavenie typu faktúry
+                'invoice_type' => $place->invoice_type,  // Nastavenie typu faktúry
             ]);
 
             // Uložíme služby do `invoice_services`
@@ -463,6 +465,25 @@ public function downloadSelectedInvoices(array $selectedInvoices)
 
         return redirect()->route('invoices.index', ['filter' => $filter])->with('status', 'Žiadne faktúry neboli vybrané.');
         }
+
+        public function download_PDF(Invoice $invoice)
+{
+    $user = auth()->user();
+    $placeName = str_replace(' ', '_', $invoice->services->first()->place_name);
+    $billingMonth = $invoice->billing_month;
+
+    $pdfFileName = $placeName . '_mesiac_' . $billingMonth . '.pdf';
+    //dd($invoice->all());
+    try {
+        // Použite 'invoices.invoice' namiesto 'invoices.pdf'
+        $pdf = \PDF::loadView('invoices.invoice', compact('invoice', 'user'));
+        return $pdf->inline($pdfFileName);
+    } catch (\Exception $e) {
+        Log::error('PDF download error: ' . $e->getMessage());
+        return response()->json(['error' => 'Failed to download PDF'], 500);
+    }
+}
+
 
         public function downloadPDF(Invoice $invoice)
     {

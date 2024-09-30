@@ -29,7 +29,6 @@
                 <option value="">{{ __('Všetky firmy') }}</option>
                 @foreach($companies as $company)
                     <option value="{{ $company->id }}" {{ request('company_filter') == $company->id ? 'selected' : '' }}>{{ $company->name }}</option>
-                    <option value="{{ $company->id }}" {{ request('company_filter') == $company->id ? 'selected' : '' }}>{{ $company->name }}</option>
                 @endforeach
             </select>
         </div>
@@ -60,6 +59,13 @@
 
         <!-- Search box for filtering by 'Miesto' -->
         <input type="text" id="search-box" placeholder="Hľadať podľa miesta..." class="border rounded py-2 px-4 w-1/3" value="{{ request('search') }}">
+    </div>
+
+    <div class="mt-4 space-x-4 text-center">
+        <button type="button" onclick="setBulkAction('mark_sent')" class="bg-green-500 text-white py-2 px-4 rounded hidden" id="mark-sent">{{ __('Označiť ako odoslané') }}</button>
+        <button type="button" onclick="openPaymentDateModal()" class="bg-yellow-500 text-white py-2 px-4 rounded hidden" id="mark-paid">{{ __('Označiť ako zaplatené') }}</button>
+        <button type="button" onclick="setBulkAction('delete_selected')" class="bg-red-500 text-white py-2 px-4 rounded hidden" id="delete-selected">{{ __('Vymazať označené') }}</button>
+        <button type="button" onclick="setBulkAction('download_selected')" class="bg-blue-500 text-white py-2 px-4 rounded hidden" id="download-selected">{{ __('Stiahnuť označené') }}</button>
     </div>
 
     <!-- Invoice Table -->
@@ -138,12 +144,7 @@
                 </div>
             </div>
             <!-- Bulk Action Buttons -->
-            <div class="mt-4 space-x-4 text-center">
-                <button type="button" onclick="setBulkAction('mark_sent')" class="bg-green-500 text-white py-2 px-4 rounded hidden" id="mark-sent">{{ __('Označiť ako odoslané') }}</button>
-                <button type="button" onclick="openPaymentDateModal()" class="bg-yellow-500 text-white py-2 px-4 rounded hidden" id="mark-paid">{{ __('Označiť ako zaplatené') }}</button>
-                <button type="button" onclick="setBulkAction('delete_selected')" class="bg-red-500 text-white py-2 px-4 rounded hidden" id="delete-selected">{{ __('Vymazať označené') }}</button>
-                <button type="button" onclick="setBulkAction('download_selected')" class="bg-blue-500 text-white py-2 px-4 rounded hidden" id="download-selected">{{ __('Stiahnuť označené') }}</button>
-            </div>
+            
         </form>
     </div>
 </div>
