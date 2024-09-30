@@ -476,7 +476,7 @@ public function downloadSelectedInvoices(array $selectedInvoices)
     //dd($invoice->all());
     try {
         // Použite 'invoices.invoice' namiesto 'invoices.pdf'
-        $pdf = \PDF::loadView('invoices.invoice', compact('invoice', 'user'));
+        $pdf = \PDF::loadView('invoices.pdf', compact('invoice', 'user'));
         return $pdf->inline($pdfFileName);
     } catch (\Exception $e) {
         Log::error('PDF download error: ' . $e->getMessage());

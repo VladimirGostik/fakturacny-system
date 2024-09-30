@@ -15,7 +15,7 @@
         }
         .container {
             width: 100%;
-            max-width: 700px;
+            max-width: 800px;
             margin: 0 auto;
             padding: 0 10px;
         }
@@ -181,8 +181,8 @@
 
                 @foreach($order as $item)
                     @if($item == 'Hlavicka') <!-- Hlavička -->
-                        @if($invoice->services->isNotEmpty() && !empty($invoice->services->first()->place_header))
-                            <p class="info-text">{{ $invoice->services->first()->place_header }}</p>
+                        @if(!empty($invoice->header))
+                            <p class="info-text">{{ $invoice->header }}</p>
                         @else
                             <p class="info-text">{{ __('') }}</p>
                         @endif
@@ -215,19 +215,8 @@
             <p class="info-text"><strong>{{ __('Forma úhrady:') }}</strong> Prevodom</p> <!-- Added payment method -->
         </div>
        
-        @php
-            $billingMonth = $invoice->billing_month;
-            $issueDate = $invoice->issue_date;
-            $billingYear = ($billingMonth == 12) ? date('Y', strtotime($issueDate)) - 1 : date('Y', strtotime($issueDate));
-        
-            // Nahradenie reťazcov
-            $descAboveService = $invoice->services->first()->desc_above_service ?? '';
-            $descAboveService = str_replace('{mesiac/rok}', $billingMonth . '/' . $billingYear, $descAboveService);
-            $descAboveService = str_replace('{mesiac}', $billingMonth, $descAboveService);
-        @endphp
-        
         <div class="desc-above-service">
-            {!! $descAboveService !!}
+            {{ $invoice->desc_above_service }}
         </div>
 
         <!-- Services Table -->

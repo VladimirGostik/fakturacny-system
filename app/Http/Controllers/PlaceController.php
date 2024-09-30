@@ -106,11 +106,12 @@ class PlaceController extends Controller
         // Predpokladáme, že máte autentifikovaného používateľa a priradenú spoločnosť
         $user = auth()->user();
         $company = $place->residentialCompany->company;
+        $residentialCompany = $place->residentialCompany;
 
 
         // Generovanie jedinečného čísla faktúry (napr. pomocou ID a aktuálneho času)
         $invoiceNumber = 'F' . strtoupper(uniqid());
-
+        //dd($residentialCompany->all());
         // Vytvorenie dát pre faktúru
         $invoice = (object) [
             'invoice_number' => $invoiceNumber,
@@ -120,15 +121,17 @@ class PlaceController extends Controller
             'company' => $company,
             'services' => $place->services,
             'invoice_type' => $place->invoice_type,
-            'residential_company_name' => $place->residentialCompany->name,
-            'residential_company_address' => $place->residentialCompany->address,
-            'residential_company_postal_code' => $place->residentialCompany->postal_code,
-            'residential_company_city' => $place->residentialCompany->city,
-            'residential_company_ico' => $place->residentialCompany->ico,
-            'residential_company_dic' => $place->residentialCompany->dic,
-            'residential_company_ic_dph' => $place->residentialCompany->ic_dph,
-            'residential_company_iban' => $place->residentialCompany->iban,
-            'residential_company_bank_connection' => $place->residentialCompany->bank_connection,
+            'residential_company_name' => $residentialCompany->name,
+            'residential_company_address' => $place->residential_company_address,
+            'residential_company_postal_code' => $place->residential_company_city,
+            'residential_company_city' => $place->residential_company_postal_code,
+            'residential_company_ico' => $place->residential_company_ico,
+            'residential_company_dic' => $place->residential_company_dic,
+            'residential_company_ic_dph' => $place->residential_company_ic_dph,
+            'residential_company_iban' => $place->residential_company_iban,
+            'residential_company_bank_connection' => $place->residential_company_bank_connection,
+            'header' => $place->header,
+            'desc_above_service' => $place->desc_above_service,
         ];
 
         // Generovanie PDF z Blade šablóny
