@@ -53,10 +53,58 @@
                         <x-input-error :messages="$errors->get('header')" class="mt-2" />
                     </div>
                     <div>
-                        <x-input-label for="desc_above_service" :value="__('Popis nad služby')" />
+                        <x-input-label for="desc_above_service" :value="__('Popis nad služby: Pre vlozenie datumu vloz: {mesiac} alebo {mesiac/rok}')" />
                         <textarea id="desc_above_service" name="desc_above_service" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-lg h-24"></textarea>
                         <x-input-error :messages="$errors->get('desc_above_service')" class="mt-2" />
                     </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <x-input-label for="residential_company_address" :value="__('Adresa')" />
+                        <x-text-input id="residential_company_address" name="residential_company_address" type="text" class="mt-1 block w-full"  />
+                    </div>
+                    <div>
+                        <x-input-label for="residential_company_city" :value="__('Mesto')" />
+                        <x-text-input id="residential_company_city" name="residential_company_city" type="text" class="mt-1 block w-full"  />
+                    </div>
+                    <div>
+                        <x-input-label for="residential_company_postal_code" :value="__('PSČ')" />
+                        <x-text-input id="residential_company_postal_code" name="residential_company_postal_code" type="text" class="mt-1 block w-full"  />
+                    </div>
+                    <div>
+                        <x-input-label for="residential_company_ico" :value="__('IČO')" />
+                        <x-text-input id="residential_company_ico" name="residential_company_ico" type="text" class="mt-1 block w-full"  />
+                    </div>
+                    <div>
+                        <x-input-label for="residential_company_dic" :value="__('DIČ')" />
+                        <x-text-input id="residential_company_dic" name="residential_company_dic" type="text" class="mt-1 block w-full"  />
+                    </div>
+                    <div>
+                        <x-input-label for="residential_company_ic_dph" :value="__('IČ DPH')" />
+                        <x-text-input id="residential_company_ic_dph" name="residential_company_ic_dph" type="text" class="mt-1 block w-full"  />
+                    </div>
+                    <div>
+                        <x-input-label for="residential_company_iban" :value="__('IBAN')" />
+                        <x-text-input id="residential_company_iban" name="residential_company_iban" type="text" class="mt-1 block w-full"  />
+                    </div>
+                    <div>
+                        <x-input-label for="residential_company_bank_connection" :value="__('Bankové spojenie')" />
+                        <x-text-input id="residential_company_bank_connection" name="residential_company_bank_connection" type="text" class="mt-1 block w-full" />
+                    </div>
+                </div>
+
+                <!-- Výber typu faktúry -->
+                <div class="mt-4">
+                    <x-input-label for="invoice_type" :value="__('Typ faktúry')" />
+                    <select id="invoice_type" name="invoice_type" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-lg">
+                        <option value="Hlavicka-Adresa-Nazov">{{ __('Hlavicka-Adresa-Nazov') }}</option>
+                        <option value="Hlavicka-Nazov-Adresa">{{ __('Hlavicka-Nazov-Adresa') }}</option>
+                        <option value="Adresa-Hlavicka-Nazov">{{ __('Adresa-Hlavicka-Nazov') }}</option>
+                        <option value="Adresa-Nazov-Hlavicka">{{ __('Adresa-Nazov-Hlavicka') }}</option>
+                        <option value="Nazov-Hlavicka-Adresa">{{ __('Nazov-Hlavicka-Adresa') }}</option>
+                        <option value="Nazov-Adresa-Hlavicka">{{ __('Nazov-Adresa-Hlavicka') }}</option>
+                    </select>
                 </div>
 
                   <!-- Add at least one service -->
@@ -198,12 +246,20 @@
                                     <!-- Place Actions -->
                                     <td class="px-4 py-2">
                                         <div class="flex flex-col space-y-2">
-                                            <button class="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded edit-button" data-id="{{ $place->id }}">{{ __('Upraviť') }}</button>
-                                            <form method="POST" action="{{ route('places.destroy', $place->id) }}" onsubmit="return confirm('Naozaj chcete vymazať toto miesto?');">
+                                            <form method="GET" action="{{ route('places.edit', $place->id) }}">
+                                                @csrf
+                                                <button type="submit" class="bg-blue-500 text-white py-1 px-2 rounded">{{ __('Upraviť') }}</button>
+                                            </form>
+                                            <button type="button" class="bg-yellow-500 text-white py-1 px-2 rounded preview-button" data-id="{{ $place->id }}">
+                                                {{ __('Náhľad') }}
+                                            </button>
+                                            <form method="POST" action="{{ route('places.destroy', $place->id) }}" onsubmit="return confirm('Naozaj chcete vymazať túto ulicu?');">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="bg-red-500 hover:bg-red-700 text-white py-2 px-4 rounded">{{ __('Vymazať') }}</button>
+                                                <button type="submit" class="bg-red-500 text-white py-1 px-2 rounded">{{ __('Vymazať') }}</button>
                                             </form>
+                                            <!-- Nové tlačidlo "Náhľad" -->
+                                            
                                         </div>
                                     </td>
                                 </tr>
@@ -239,8 +295,19 @@
             </div>            
         </section>
     </div>
+<!-- Modal -->
+<div id="preview-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-lg overflow-hidden w-11/12 md:w-4/5 lg:w-3/4 xl:w-2/3 relative">
+        <button id="close-modal" class="absolute top-2 right-2 text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white text-2xl">&times;</button>
+        <iframe id="preview-pdf" src="" class="w-full h-[85vh]"></iframe>
+    </div>
+</div>
+
+
 
 <script>
+    let residentialCompanies = @json($residential_companies);
+
     // Dynamické filtrovanie ulíc
     document.getElementById('street-search').addEventListener('input', function() {
         let filter = this.value.toLowerCase();
@@ -260,6 +327,35 @@
             }
         });
     });
+    document.getElementById('residential_company_id').addEventListener('change', function() {
+            let companyId = this.value;
+
+            if (companyId) {
+                // Vyhľadávanie vybraného bytového podniku z JSON objektu
+                let selectedCompany = residentialCompanies.find(company => company.id == companyId);
+
+                if (selectedCompany) {
+                    document.getElementById('residential_company_address').value = selectedCompany.address || '';
+                    document.getElementById('residential_company_city').value = selectedCompany.city || '';
+                    document.getElementById('residential_company_postal_code').value = selectedCompany.postal_code || '';
+                    document.getElementById('residential_company_ico').value = selectedCompany.ico || '';
+                    document.getElementById('residential_company_dic').value = selectedCompany.dic || '';
+                    document.getElementById('residential_company_ic_dph').value = selectedCompany.ic_dph || '';
+                    document.getElementById('residential_company_iban').value = selectedCompany.iban || '';
+                    document.getElementById('residential_company_bank_connection').value = selectedCompany.bank_connection || '';
+                }
+            } else {
+                // Reset fields if no company is selected
+                document.getElementById('residential_company_address').value = '';
+                document.getElementById('residential_company_city').value = '';
+                document.getElementById('residential_company_postal_code').value = '';
+                document.getElementById('residential_company_ico').value = '';
+                document.getElementById('residential_company_dic').value = '';
+                document.getElementById('residential_company_ic_dph').value = '';
+                document.getElementById('residential_company_iban').value = '';
+                document.getElementById('residential_company_bank_connection').value = '';
+            }
+        });
 
     // Filtrovanie podľa bytového podniku
     document.getElementById('filter-company').addEventListener('change', function () {
@@ -294,6 +390,29 @@
             let id = this.getAttribute('data-id');
             document.getElementById('edit-service-row-' + id).classList.add('hidden');
         });
+    });
+
+    // Modal funkcionalita
+    document.querySelectorAll('.preview-button').forEach(button => {
+        button.addEventListener('click', function() {
+            let placeId = this.getAttribute('data-id');
+            let pdfUrl = "{{ route('places.invoice', ':id') }}".replace(':id', placeId);
+            document.getElementById('preview-pdf').src = pdfUrl;
+            document.getElementById('preview-modal').classList.remove('hidden');
+        });
+    });
+
+    document.getElementById('close-modal').addEventListener('click', function() {
+        document.getElementById('preview-modal').classList.add('hidden');
+        document.getElementById('preview-pdf').src = ''; // Vyčistenie src pre zastavenie načítania PDF
+    });
+
+    // Zavretie modálu kliknutím mimo obsah
+    document.getElementById('preview-modal').addEventListener('click', function(e) {
+        if (e.target == this) {
+            this.classList.add('hidden');
+            document.getElementById('preview-pdf').src = '';
+        }
     });
 
     function addServiceRow() {

@@ -30,6 +30,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/invoices/generate-monthly', [InvoiceController::class, 'generateMonthlyInvoices'])->name('invoices.generate_monthly');
     Route::get('/invoices/{invoice}/download', [InvoiceController::class, 'downloadPDF'])->name('invoices.download_pdf');
     Route::delete('/invoices/{invoice}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
+    Route::get('/invoices/{invoice}/download-pdf', [InvoiceController::class, 'download_PDF'])->name('invoices.downloadPDF');
+
     
     Route::get('/companies', [CompanyController::class, 'index'])->name('companies.index');
     Route::post('/companies', [CompanyController::class, 'store'])->name('companies.store');
@@ -44,6 +46,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/residential-companies/{residential_company}', [ResidentialCompanyController::class, 'destroy'])->name('residential-companies.destroy');
 
     Route::resource('places', PlaceController::class)->middleware('auth');
+    Route::get('places/{place}/edit', [PlaceController::class, 'edit'])->name('places.edit');
+    Route::get('/places/{place}/invoice', [PlaceController::class, 'generateInvoice'])->name('places.invoice');
+
 
     Route::post('/services/{place_id}', [ServiceController::class, 'store'])->name('services.store');
     Route::resource('services', ServiceController::class);

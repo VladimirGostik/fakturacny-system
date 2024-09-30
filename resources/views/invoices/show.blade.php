@@ -83,9 +83,61 @@
         <!-- Tlačidlo na úpravu faktúry -->
     <div class="mt-6 flex justify-between">
         <a href="{{ route('invoices.edit', $invoice) }}" class="bg-yellow-500 text-white py-2 px-4 rounded hover:bg-yellow-600">{{ __('Upraviť faktúru') }}</a>
+        <button type="button" class="bg-yellow-500 text-white py-2 px-4 rounded preview-button" data-id="{{ $invoice->id }}">
+            {{ __('Náhľad') }}
+        </button>
         <a href="{{ route('invoices.index') }}" class="bg-blue-500 text-white py-2 px-4 rounded">{{ __('Späť na faktúry') }}</a>
     </div>
 
     </div>
 </div>
+<div id="preview-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden transition-opacity duration-300">
+    <div class="bg-white dark:bg-gray-800 rounded-lg overflow-hidden w-11/12 md:w-4/5 lg:w-3/4 xl:w-2/3 max-w-5xl relative transform transition-transform duration-300 scale-95">
+        <button id="close-modal" class="absolute top-2 right-2 text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white text-2xl">&times;</button>
+        <iframe id="preview-pdf" src="" class="w-full h-[85vh]"></iframe>
+    </div>
+</div>
+<script>
+document.querySelectorAll('.preview-button').forEach(button => {
+    button.addEventListener('click', function() {
+        let invoiceId = this.getAttribute('data-id');
+        let pdfUrl = "{{ route('invoices.downloadPDF', ':id') }}".replace(':id', invoiceId);
+        document.getElementById('preview-pdf').src = pdfUrl;
+        let modal = document.getElementById('preview-modal');
+        modal.classList.remove('hidden');
+        // Pridajte triedy pre animáciu
+        setTimeout(() => {
+            modal.classList.add('opacity-100');
+            modal.querySelector('div').classList.remove('scale-95');
+            modal.querySelector('div').classList.add('scale-100');
+        }, 10); // Malé oneskorenie pre prechod
+    });
+});
+
+document.getElementById('close-modal').addEventListener('click', function() {
+    let modal = document.getElementById('preview-modal');
+    // Pridajte triedy pre animáciu zatvorenia
+    modal.classList.remove('opacity-100');
+    modal.querySelector('div').classList.add('scale-95');
+    modal.querySelector('div').classList.remove('scale-100');
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        document.getElementById('preview-pdf').src = ''; // Vyčistenie src pre zastavenie načítania PDF
+    }, 300); // Trvanie musí zodpovedať transition duration
+});
+
+// Close modal when clicking outside the content
+document.getElementById('preview-modal').addEventListener('click', function(e) {
+    if (e.target == this) {
+        let modal = document.getElementById('preview-modal');
+        modal.classList.remove('opacity-100');
+        modal.querySelector('div').classList.add('scale-95');
+        modal.querySelector('div').classList.remove('scale-100');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            document.getElementById('preview-pdf').src = '';
+        }, 300);
+    }
+});
+</script>
 @endsection
