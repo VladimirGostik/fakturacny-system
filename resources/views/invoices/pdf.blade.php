@@ -169,7 +169,6 @@
                 <p class="info-text">{{ $invoice->company->city }}, {{ $invoice->company->postal_code }}</p>
                 <p class="info-text">{{ __('IČO:') }} {{ $invoice->company->ico }}</p>
                 <p class="info-text">{{ __('DIČ:') }} {{ $invoice->company->dic }}</p>
-                <p class="info-text">{{ __('IBAN:') }} {{ $invoice->company->iban }}</p>
             </div>
 
             <div class="client-info">
