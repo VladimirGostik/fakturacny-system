@@ -18,7 +18,8 @@ class Place extends Model
         'residential_company_ic_dph',
         'residential_company_iban',
         'residential_company_bank_connection',
-        'invoice_type'];
+        'invoice_type',
+        'desc_services'];
 
     public function residentialCompany()
     {

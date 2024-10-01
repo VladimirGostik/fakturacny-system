@@ -27,6 +27,7 @@ class Invoice extends Model
         'status',
         'billing_month',
         'invoice_type',
+        'desc_services',
     ];
 
     // Vzťah k spoločnosti (firma)

@@ -110,7 +110,11 @@
                   <!-- Add at least one service -->
                   <div class="mt-4">
                     <h3 class="font-bold text-white text-xl">{{ __('Služby') }}</h3>
-
+                    <div>
+                        <x-input-label for="desc_services" :value="__('Veta nad sluzby:')" />
+                        <x-text-input id="desc_services" name="desc_services" type="text" class="mt-1 block w-full"  />
+                    </div>
+                    
                     <div id="services-section">
                         <div class="grid grid-cols-2 gap-4 mt-2">
                             <div>
