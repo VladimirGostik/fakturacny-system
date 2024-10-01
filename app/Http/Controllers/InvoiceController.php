@@ -42,7 +42,14 @@ class InvoiceController extends Controller
         if ($residentialFilter) {
             $query->where('residential_company_id', $residentialFilter);
         }
-    
+        
+        if ($sortBy == 'invoice_number') {
+            // Pre PostgreSQL použijeme CAST ako INTEGER
+            $query->orderByRaw('CAST(SPLIT_PART(invoice_number, \'/\', 1) AS INTEGER) ' . $sortDirection);
+        } else {
+            // Iné polia zoraďujeme normálne
+            $query->orderBy($sortBy, $sortDirection);
+        }
         // Vyhľadávanie v miestach (places) podľa vyhľadávacieho poľa
         if (!empty($searchTerm)) {
             $query->whereHas('services', function ($query) use ($searchTerm) {
@@ -50,8 +57,8 @@ class InvoiceController extends Controller
             });
         }
     
-        // Zoradenie a stránkovanie
-        $invoices = $query->orderBy($sortBy, $sortDirection)->paginate($perPage);
+        // Stránkovanie
+        $invoices = $query->paginate($perPage);
     
         return view('invoices.index', compact('invoices', 'companies', 'filter', 'residentialCompanies', 'perPage', 'sortBy', 'sortDirection', 'companyFilter', 'residentialFilter', 'searchTerm'));
     }    
@@ -303,15 +310,6 @@ public function generateMonthlyInvoices(Request $request)
                 continue;
             }
 
-            // Nájdeme poslednú faktúru pre túto firmu, bytový podnik a ulicu
-            $lastInvoice = Invoice::where('company_id', $company->id)
-                ->where('residential_company_id', $residentialCompany->id)
-                ->whereHas('services', function($query) use ($place) {
-                    $query->where('place_name', $place->name);
-                })
-                ->orderBy('issue_date', 'desc')
-                ->first();
-
             // Vytvoríme nové číslo faktúry
             $newInvoiceNumber = $this->generateInvoiceNumber($company->id, $billingMonth, $issueDate);
 
@@ -362,15 +360,19 @@ private function generateInvoiceNumber($companyId, $billingMonth, $issueDate)
 
     // Získajte najväčšie číslo faktúry pre daný rok a firmu
     $lastInvoice = Invoice::where('company_id', $companyId)
-                    ->whereYear('issue_date', $billingYear)
-                    ->orderBy('invoice_number', 'desc')
-                    ->first();
+    ->whereYear('issue_date', $billingYear)
+    ->get()
+    ->sortBy(function($invoice) {
+        return intval(explode('/', $invoice->invoice_number)[0]);
+    })
+    ->last();
 
     // Získajte nové číslo faktúry
     if ($lastInvoice) {
         // Extrahujte časť čísla faktúry pred "/"
-        $lastInvoiceNumber = explode('/', $lastInvoice->invoice_number)[0];
+        $lastInvoiceNumber = trim(explode('/', $lastInvoice->invoice_number)[0]);
         $newInvoiceNumber = intval($lastInvoiceNumber) + 1;
+        // Debugging: vypíše hodnoty pre kontrolu
     } else {
         $newInvoiceNumber = 1;
     }
@@ -378,8 +380,6 @@ private function generateInvoiceNumber($companyId, $billingMonth, $issueDate)
     // Vytvorte nové číslo faktúry s rokom fakturácie
     return $newInvoiceNumber . '/' . $billingYear;
 }
-
-
 
 public function downloadSelectedInvoices(array $selectedInvoices)
 {
