@@ -115,6 +115,7 @@ class InvoiceController extends Controller
                 'new_street' => 'nullable|string|max:255',
                 'existing_place' => 'nullable|exists:places,id',
                 'header' => 'nullable|string|max:255',
+                'desc_services' => 'nullable|string|max:255',
                 'invoice_type' => [
                     'required',
                     Rule::in([
@@ -176,6 +177,7 @@ class InvoiceController extends Controller
                 'new_street' => 'nullable|string|max:255',
                 'existing_place' => 'nullable|exists:places,id',
                 'header' => 'nullable|string|max:255',
+                'desc_services' => 'nullable|string|max:255',
                 'invoice_type' => [
                     'required',
                     Rule::in([
@@ -226,12 +228,14 @@ class InvoiceController extends Controller
                 'residential_company_ic_dph' => $validated['residential_company_ic_dph'],
                 'residential_company_iban' => $validated['residential_company_iban'],
                 'residential_company_bank_connection' => $validated['residential_company_bank_connection'],
+                'header' => $validated['header'],
+                'desc_services' => $validated['desc_services'],
                 'issue_date' => $validated['issue_date'],
                 'due_date' => $validated['due_date'],
                 'billing_month' => $validated['billing_month'],
                 'invoice_type' => $validated['invoice_type'],
             ]);
-        
+
             // Determine place name
             $placeName = $validated['new_street'] ?: Place::find($validated['existing_place'])->name;
         
@@ -316,7 +320,7 @@ public function generateMonthlyInvoices(Request $request)
                 'invoice_number' => $newInvoiceNumber,
                 'company_id' => $company->id,
                 'residential_company_id' => $residentialCompany->id,
-                'residential_company_name' => $place->residential_company_name,
+                'residential_company_name' => $residentialCompany->name,
                 'residential_company_address' => $place->residential_company_address,
                 'residential_company_city' => $place->residential_company_city,
                 'residential_company_postal_code' => $place->residential_company_postal_code,
@@ -329,6 +333,7 @@ public function generateMonthlyInvoices(Request $request)
                 'due_date' => $dueDate,
                 'billing_month' => $billingMonth,
                 'invoice_type' => $place->invoice_type,  // Nastavenie typu faktúry
+                'desc_services' => $place->desc_services,
             ]);
 
             // Uložíme služby do `invoice_services`
@@ -473,7 +478,7 @@ public function downloadSelectedInvoices(array $selectedInvoices)
     $billingMonth = $invoice->billing_month;
 
     $pdfFileName = $placeName . '_mesiac_' . $billingMonth . '.pdf';
-    //dd($invoice->all());
+    //dd($invoice);
     try {
         // Použite 'invoices.invoice' namiesto 'invoices.pdf'
         $pdf = \PDF::loadView('invoices.pdf', compact('invoice', 'user'));
@@ -492,7 +497,6 @@ public function downloadSelectedInvoices(array $selectedInvoices)
         $billingMonth = $invoice->billing_month;
 
         $pdfFileName = $placeName . '_mesiac_' . $billingMonth . '.pdf';
-        //dd($invoice->all());
         try {
             $pdf = \PDF::loadView('invoices.pdf', compact('invoice', 'user'));
             return $pdf->download($pdfFileName);

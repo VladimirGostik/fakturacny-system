@@ -49,6 +49,7 @@ class PlaceController extends Controller
             'residential_company_iban' => 'nullable|string|max:255',
             'residential_company_bank_connection' => 'nullable|string|max:255',
             'invoice_type' => 'required|string|max:255',
+            'desc_services' => 'nullable|string|max:255',
         ]);
 
         // Vytvorenie novej ulice
@@ -80,6 +81,7 @@ class PlaceController extends Controller
             'residential_company_iban' => 'nullable|string|max:255',
             'residential_company_bank_connection' => 'nullable|string|max:255',
             'invoice_type' => 'required|string|max:255',
+            'desc_services' => 'nullable|string|max:255',
         ]);
 
         $place = Place::find($id);
@@ -132,6 +134,7 @@ class PlaceController extends Controller
             'residential_company_bank_connection' => $place->residential_company_bank_connection,
             'header' => $place->header,
             'desc_above_service' => $place->desc_above_service,
+            'desc_services' => $place->desc_services,
         ];
 
         // Generovanie PDF z Blade šablóny

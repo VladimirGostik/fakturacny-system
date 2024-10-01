@@ -107,6 +107,10 @@
                     <option value="Nazov-Adresa-Hlavicka" {{ $place->invoice_type == 'Nazov-Adresa-Hlavicka' ? 'selected' : '' }}>Nazov-Adresa-Hlavicka</option>
                 </select>
             </div>
+            <div>
+                <x-input-label for="desc_services" :value="__('Veta nad sluzby:')" />
+                <x-text-input id="desc_services" name="desc_services" type="text" class="mt-1 block w-full"  value="{{ $place->desc_services}}" />
+            </div>
 
             <div class="flex items-center justify-end mt-4">
                 <x-primary-button>{{ __('Uložiť') }}</x-primary-button>

@@ -203,6 +203,11 @@
 
             <!-- Služby -->
             <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-6">{{ __('Služby') }}</h2>
+            <div>
+                <x-input-label for="desc_services" :value="__('Veta nad sluzby:')" />
+                <x-text-input id="desc_services" name="desc_services" type="text" class="mt-1 block w-full"  />
+            </div>
+            
             <div id="services_section" class="mt-4">
                 <div class="grid grid-cols-3 gap-4">
                     <div>

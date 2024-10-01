@@ -21,12 +21,17 @@
 
             <div class="border border-gray-300 dark:border-gray-700 rounded-lg p-6">
                 <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">{{ __('Informácie o bytovom podniku') }}</h3>
+                @if($invoice->services->isNotEmpty() && !empty($invoice->services->first()->place_header))
+                    <p class="text-gray-600 dark:text-gray-400">{{ $invoice->services->first()->place_header }}</p>
+                @endif                
                 <p class="text-gray-600 dark:text-gray-400"><strong>{{ $invoice->residential_company_name }}</strong></p>
                 <p class="text-gray-600 dark:text-gray-400">{{ $invoice->residential_company_address }}</p>
                 <p class="text-gray-600 dark:text-gray-400">{{ $invoice->residential_company_city }}, {{ $invoice->residential_company_postal_code }}</p>
                 <p class="text-gray-600 dark:text-gray-400">{{ __('IČO:') }} {{ $invoice->residential_company_ico }}</p>
                 <p class="text-gray-600 dark:text-gray-400">{{ __('DIČ:') }} {{ $invoice->residential_company_dic }}</p>
                 <p class="text-gray-600 dark:text-gray-400">{{ __('IČ DPH:') }} {{ $invoice->residential_company_ic_dph }}</p>
+                <p class="text-gray-600 dark:text-gray-400">{{ __('IBAN:') }} {{ $invoice->residential_company_iban }}</p>
+
             </div>
         </div>
 
@@ -55,16 +60,19 @@
                             <th class="px-6 py-3 text-left">{{ __('Popis služby') }}</th>
                             <th class="px-6 py-3 text-left">{{ __('Cena služby') }}</th>
                             <th class="px-6 py-3 text-left">{{ __('Názov miesta') }}</th>
-                            <th class="px-6 py-3 text-left">{{ __('Popis miesta') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        <tr>
+                            <td class="px-6 py-4">
+                                {{ $invoice->desc_services}}
+                            </td>
+                        </tr>
                         @foreach ($invoice->services as $service)
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                 <td class="px-6 py-4">{{ $service->service_description }}</td>
                                 <td class="px-6 py-4">{{ number_format($service->service_price, 2) }} €</td>
                                 <td class="px-6 py-4">{{ $service->place_name }}</td>
-                                <td class="px-6 py-4">{{ $service->place_header }}</td>
                             </tr>
                         @endforeach
                     </tbody>

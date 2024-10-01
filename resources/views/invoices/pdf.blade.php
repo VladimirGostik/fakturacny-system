@@ -149,7 +149,7 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1>{{ __('Faktúra') }} č.       </h1>
+            <h1>{{ __('Faktúra') }} č.{{ $invoice->invoice_number }}</h1>
         </div>
         <div class="invoice-details">
             <strong>
@@ -202,7 +202,9 @@
                 @if(!empty($invoice->residential_company_ic_dph))
                     <p class="info-text">{{ __('IČ DPH:') }} {{ $invoice->residential_company_ic_dph }}</p>
                 @endif
-        
+                @if(!empty($invoice->residential_company_iban))
+                    <p class="info-text">{{ __('IBAN:') }} {{ $invoice->residential_company_iban }}</p>
+                @endif
             </div>
         </div>
 
@@ -239,6 +241,13 @@
                 </tr>
             </thead>
             <tbody>
+                @if(!empty($invoice->desc_services))
+                    <tr>
+                        <td colspan="3" style="text-align: left;">
+                            {{ $invoice->desc_services }}
+                        </td>
+                    </tr>
+                @endif
                 @foreach ($invoice->services as $service)
                 <tr>
                     <td>{{ $service->service_description }}</td>
