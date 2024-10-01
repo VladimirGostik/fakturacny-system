@@ -149,7 +149,7 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1>{{ __('Faktúra') }} č.{{ $invoice->invoice_number }}</h1>
+            <h1>{{ __('Faktúra') }} č.       </h1>
         </div>
         <div class="invoice-details">
             <strong>
