@@ -128,47 +128,47 @@
             <div id="residential_info" class="grid grid-cols-2 gap-4 mt-6 hidden">
                 <div>
                     <x-input-label for="residential_company_name" :value="__('Názov bytového podniku')" class="text-lg" />
-                    <x-text-input id="residential_company_name" name="residential_company_name" type="text" class="mt-1 block w-full" readonly />
+                    <x-text-input id="residential_company_name" name="residential_company_name" type="text" class="mt-1 block w-full"  />
                 </div>
 
                 <div>
                     <x-input-label for="residential_company_address" :value="__('Adresa bytového podniku')" class="text-lg" />
-                    <x-text-input id="residential_company_address" name="residential_company_address" type="text" class="mt-1 block w-full" readonly />
+                    <x-text-input id="residential_company_address" name="residential_company_address" type="text" class="mt-1 block w-full"  />
                 </div>
 
                 <div>
                     <x-input-label for="residential_company_postal_code" :value="__('PSČ')" class="text-lg" />
-                    <x-text-input id="residential_company_postal_code" name="residential_company_postal_code" type="text" class="mt-1 block w-full" readonly />
+                    <x-text-input id="residential_company_postal_code" name="residential_company_postal_code" type="text" class="mt-1 block w-full"  />
                 </div>
 
                 <div>
                     <x-input-label for="residential_company_city" :value="__('Mesto')" class="text-lg" />
-                    <x-text-input id="residential_company_city" name="residential_company_city" type="text" class="mt-1 block w-full" readonly />
+                    <x-text-input id="residential_company_city" name="residential_company_city" type="text" class="mt-1 block w-full"  />
                 </div>
 
                 <div>
                     <x-input-label for="residential_company_ico" :value="__('IČO')" class="text-lg" />
-                    <x-text-input id="residential_company_ico" name="residential_company_ico" type="text" class="mt-1 block w-full" readonly />
+                    <x-text-input id="residential_company_ico" name="residential_company_ico" type="text" class="mt-1 block w-full"  />
                 </div>
 
                 <div>
                     <x-input-label for="residential_company_dic" :value="__('DIČ')" class="text-lg" />
-                    <x-text-input id="residential_company_dic" name="residential_company_dic" type="text" class="mt-1 block w-full" readonly />
+                    <x-text-input id="residential_company_dic" name="residential_company_dic" type="text" class="mt-1 block w-full"  />
                 </div>
 
                 <div>
                     <x-input-label for="residential_company_ic_dph" :value="__('IČ DPH')" class="text-lg" />
-                    <x-text-input id="residential_company_ic_dph" name="residential_company_ic_dph" type="text" class="mt-1 block w-full" readonly />
+                    <x-text-input id="residential_company_ic_dph" name="residential_company_ic_dph" type="text" class="mt-1 block w-full"  />
                 </div>
 
                 <div>
                     <x-input-label for="residential_company_iban" :value="__('IBAN')" class="text-lg" />
-                    <x-text-input id="residential_company_iban" name="residential_company_iban" type="text" class="mt-1 block w-full" readonly />
+                    <x-text-input id="residential_company_iban" name="residential_company_iban" type="text" class="mt-1 block w-full"  />
                 </div>
 
                 <div>
                     <x-input-label for="residential_company_bank_connection" :value="__('Bankové spojenie')" class="text-lg" />
-                    <x-text-input id="residential_company_bank_connection" name="residential_company_bank_connection" type="text" class="mt-1 block w-full" readonly />
+                    <x-text-input id="residential_company_bank_connection" name="residential_company_bank_connection" type="text" class="mt-1 block w-full"  />
                 </div>
             </div>
 
