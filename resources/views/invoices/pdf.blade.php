@@ -2,37 +2,35 @@
 <html lang="sk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
             font-family: DejaVu Sans, sans-serif;
             color: #333;
-            line-height: 1.6;
             margin: 0;
             padding: 0;
         }
         .container {
             width: 100%;
-            max-width: 700px; /* Pôvodne 800px, zmenšené na 700px */
+            max-width: 700px;
             margin: 0 auto;
             padding: 0 10px;
         }
         .header {
             background-color: #f5f5f5;
-            padding: 15px; /* Pôvodne 20px */
+            padding: 10px;
             text-align: center;
             border-bottom: 4px solid #2f5597;
         }
         .header h1 {
             margin: 0;
-            font-size: 22px; /* Pôvodne 24px */
+            font-size: 22px;
             color: #333;
         }
         .invoice-info {
-            margin-top: 20px;
+            margin-top: 10px;
         }
         .company-info, .client-info {
-            width: 48%; /* Pôvodne 49% */
+            width: 48%;
             display: inline-block;
             vertical-align: top;
         }
@@ -42,53 +40,44 @@
         .section-title {
             font-weight: bold;
             color: #2f5597;
-            font-size: 15px; /* Pôvodne 18px */
-            margin-bottom: 15px; /* Pôvodne 20px */
+            font-size: 15px;
+            margin-bottom: 10px;
         }
         .info-text {
-            margin: 3px 0; /* Pôvodne 5px */
+            margin: 2px 0;
             color: #555;
-            font-size: 13px; /* Zmenšené písmo */
+            font-size: 13px;
         }
         .invoice-details {
             width: 100%;
-            margin: 10px auto; /* Pôvodne 15px */
+            margin: 5px auto;
             background-color: #2f5597c0;
             border-radius: 8px;
             text-align: center;
-            padding: 10px; /* Pridaný padding */
+            padding: 5px;
         }
-
         .invoice-details strong span {
             display: inline-block;
-            margin: 0 10px; /* Pôvodne 15px */
-            font-size: 13px; /* Zmenšené písmo */
+            margin: 0 5px;
+            font-size: 13px;
         }
-
         .payment-details {
             background-color: #3576c0a6;
-            padding: 15px; /* Pôvodne 20px */
-            margin: 20px 0; /* Pôvodne 30px */
+            padding: 10px;
+            margin: 10px 0;
             border-radius: 10px;
             text-align: left;
-            display: inline-block;
             border: 2px solid #2f5597;
-            width: 92%; /* Zmenšená šírka */
+            width: 92%;
         }
-
-        .invoice-details p {
-            margin: 5px 0;
-            font-size: 18px;
-        }
-
         .table {
             width: 100%;
             border-collapse: collapse;
-            margin: 20px 0; /* Pôvodne 30px */
-            font-size: 13px; /* Zmenšené písmo */
+            margin: 10px 0;
+            font-size: 13px;
         }
         .table th, .table td {
-            padding: 10px 12px; /* Pôvodne 12px 15px */
+            padding: 5px 8px;
             border: 1px solid #ddd;
             text-align: left;
         }
@@ -99,53 +88,73 @@
         .table td {
             background-color: #f9f9f9;
         }
-        .table td.total {
-            text-align: right;
-            font-weight: bold;
-        }
         .total-section {
-            margin-top: 20px; /* Pôvodne 30px */
+            margin-top: 10px;
             text-align: right;
         }
         .total-section h2 {
             margin: 0;
-            font-size: 20px; /* Pôvodne 22px */
+            font-size: 20px;
             color: #2f5597;
         }
-        .footer {
-            margin-top: 50px;
-            padding: 10px 0;
-            text-align: center;
-            font-size: 12px;
-            color: #777;
-            border-top: 1px solid #ddd;
+        /* Nové štýly pre umiestnenie podpisu a pätičky */
+        .push {
+            height: auto;
         }
         .signature-section {
             width: 100%;
+            margin-top: 20px;
+            display: block;
+        }
+        .signature-section div {
+            width: 48%;
             display: inline-block;
             vertical-align: top;
         }
-
-        .signature-section div {
-            margin-top: 70px; /* Pôvodne 100px */
-            width: 48%; /* Zmenšené */
-            display: inline-block;
-            vertical-align: top;
+        .signature-left {
+            text-align: left;
         }
         .signature-right {
             text-align: right;
         }
         .signature-line {
-            margin-top: 30px; /* Pôvodne 40px */
+            margin-top: 20px;
             border-top: 1px solid #333;
             padding-top: 5px;
             width: 80%;
             margin-left: auto;
             margin-right: auto;
         }
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+            border-top: 1px solid #ddd;
+            padding: 5px 0;
+            margin-top: 20px;
+        }
+        /* Pridané pre tlačenie podpisu a pätičky na spodok */
+        .wrapper {
+            min-height: 100%;
+            position: relative;
+        }
+        .content {
+            padding-bottom: 150px; /* Výška podpisu a pätičky */
+        }
+        .signature-section, .footer {
+            position: absolute;
+            align-items: center;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+        }
+        .signature-section {
+            bottom: 50px; /* Výška pätičky */
+        }
     </style>
 </head>
 <body>
+<<<<<<< HEAD
     <div class="container">
         <!-- Header -->
         <div class="header">
@@ -169,28 +178,65 @@
                 <p class="info-text">{{ $invoice->company->city }}, {{ $invoice->company->postal_code }}</p>
                 <p class="info-text">{{ __('IČO:') }} {{ $invoice->company->ico }}</p>
                 <p class="info-text">{{ __('DIČ:') }} {{ $invoice->company->dic }}</p>
+=======
+    <div class="wrapper">
+        <div class="container content">
+            <!-- Hlavička -->
+            <div class="header">
+                <h1>{{ __('Faktúra') }} č.        </h1>
+            </div>
+            <div class="invoice-details">
+                <strong>
+                    <span>{{ __('Fakturačný mesiac:') }} {{ $invoice->billing_month }}</span>
+                    <span class="spacer">{{ __('Dátum vystavenia:') }} {{ \Carbon\Carbon::parse($invoice->issue_date)->format('d-m-Y') }}</span>
+                    <span class="spacer">{{ __('Dátum splatnosti:') }} {{ \Carbon\Carbon::parse($invoice->due_date)->format('d-m-Y') }}</span>
+                </strong>
+>>>>>>> 90160b74138d910821878acc61c9f26cbfb52224
             </div>
 
-            <div class="client-info">
-                <div class="section-title">{{ __('Odoberateľ') }}</div>
-                @php
-                $order = explode('-', $invoice->invoice_type);
-                @endphp
+            <!-- Informácie o firme a klientovi -->
+            <div class="invoice-info">
+                <div class="company-info">
+                    <div class="section-title">{{ __('Dodávateľ') }}</div>
+                    <p class="info-text"><strong>{{ $invoice->company->name }}</strong></p>
+                    <p class="info-text">{{ $invoice->company->address }}</p>
+                    <p class="info-text">{{ $invoice->company->city }}, {{ $invoice->company->postal_code }}</p>
+                    <p class="info-text">{{ __('IČO:') }} {{ $invoice->company->ico }}</p>
+                    <p class="info-text">{{ __('DIČ:') }} {{ $invoice->company->dic }}</p>
+                </div>
 
+<<<<<<< HEAD
             @foreach($order as $item)
                 @if($item == 'Hlavicka') <!-- Hlavička -->
                     @if($invoice->services->isNotEmpty() && !empty($invoice->services->first()->place_header))
                         <p class="info-text">{{ $invoice->services->first()->place_header }}</p>
                     @else
                         <p class="info-text">{{ __('') }}</p>
-                    @endif
-                @elseif($item == 'Nazov') <!-- Názov -->
-                    <p class="info-text"><strong>{{ $invoice->residential_company_name }}</strong></p>
-                @elseif($item == 'Adresa') <!-- Adresa -->
-                    <p class="info-text">{{ $invoice->residential_company_address }}, {{ $invoice->residential_company_postal_code }}, {{ $invoice->residential_company_city }}</p>
-                @endif
-            @endforeach
+=======
+                <div class="client-info">
+                    <div class="section-title">{{ __('Odoberateľ') }}</div>
+                    @php
+                    $order = explode('-', $invoice->invoice_type);
+                    @endphp
 
+                    @foreach($order as $item)
+                        @if($item == 'Hlavicka')
+                            @if($invoice->services->isNotEmpty() && !empty($invoice->services->first()->place_header))
+                                <p class="info-text">{{ $invoice->services->first()->place_header }}</p>
+                            @endif
+                        @elseif($item == 'Nazov')
+                            <p class="info-text"><strong>{{ $invoice->residential_company_name }}</strong></p>
+                        @elseif($item == 'Adresa')
+                            <p class="info-text">{{ $invoice->residential_company_address }}, {{ $invoice->residential_company_postal_code }}, {{ $invoice->residential_company_city }}</p>
+                        @endif
+                    @endforeach
+
+                    @if(!empty($invoice->residential_company_ico))
+                        <p class="info-text">{{ __('IČO:') }} {{ $invoice->residential_company_ico }}</p>
+>>>>>>> 90160b74138d910821878acc61c9f26cbfb52224
+                    @endif
+
+<<<<<<< HEAD
                 @if(!empty($invoice->residential_company_ico))
                     <p class="info-text">{{ __('IČO:') }} {{ $invoice->residential_company_ico }}</p>
                 @endif
@@ -205,9 +251,22 @@
                 @if(!empty($invoice->residential_company_iban))
                     <p class="info-text">{{ __('IBAN:') }} {{ $invoice->residential_company_iban }}</p>
                 @endif
-            </div>
-        </div>
+=======
+                    @if(!empty($invoice->residential_company_dic))
+                        <p class="info-text">{{ __('DIČ:') }} {{ $invoice->residential_company_dic }}</p>
+                    @endif
 
+                    @if(!empty($invoice->residential_company_ic_dph))
+                        <p class="info-text">{{ __('IČ DPH:') }} {{ $invoice->residential_company_ic_dph }}</p>
+                    @endif
+                    @if(!empty($invoice->residential_company_iban))
+                        <p class="info-text">{{ __('IBAN:') }} {{ $invoice->residential_company_iban }}</p>
+                    @endif
+                </div>
+>>>>>>> 90160b74138d910821878acc61c9f26cbfb52224
+            </div>
+
+<<<<<<< HEAD
         <div class="payment-details">
             <div class="section-title">{{ __('Platobne udaje') }}</div>
             <p class="info-text"><strong>{{ __('IBAN:') }}</strong> {{ $invoice->company->iban }}</p>
@@ -229,15 +288,57 @@
         <div class="desc-above-service">
             {!! $descAboveService !!}
         </div>
+=======
+            <div class="payment-details">
+                <div class="section-title">{{ __('Platobné údaje') }}</div>
+                <p class="info-text"><strong>{{ __('IBAN:') }}</strong> {{ $invoice->company->iban }}</p>
+                <p class="info-text"><strong>{{ __('Bankové spojenie:') }}</strong> {{ $invoice->company->bank_connection }}</p>
+                <p class="info-text"><strong>{{ __('Forma úhrady:') }}</strong> Prevodom</p>
+            </div>
 
-        <!-- Services Table -->
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>{{ __('Popis služby') }}</th>
-                    <th>{{ __('Množstvo') }}</th>
-                    <th>{{ __('Cena služby') }}</th>
+            @php
+                $billingMonth = $invoice->billing_month;
+                $issueDate = $invoice->issue_date;
+                $billingYear = ($billingMonth == 12) ? date('Y', strtotime($issueDate)) - 1 : date('Y', strtotime($issueDate));
 
+                $descAboveService = $invoice->services->first()->desc_above_service ?? '';
+                $descAboveService = str_replace('{mesiac/rok}', $billingMonth . '/' . $billingYear, $descAboveService);
+                $descAboveService = str_replace('{mesiac}', $billingMonth, $descAboveService);
+            @endphp
+
+            <div class="desc-above-service">
+                {!! $descAboveService !!}
+            </div>
+>>>>>>> 90160b74138d910821878acc61c9f26cbfb52224
+
+            <!-- Tabuľka služieb -->
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>{{ __('Popis služby') }}</th>
+                        <th>{{ __('Množstvo') }}</th>
+                        <th>{{ __('Cena služby') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if(!empty($invoice->desc_services))
+                        <tr>
+                            <td colspan="3" style="text-align: left;">
+                                {{ $invoice->desc_services }}
+                            </td>
+                        </tr>
+                    @endif
+                    @foreach ($invoice->services as $service)
+                    <tr>
+                        <td>{{ $service->service_description }}</td>
+                        <td>{{ __('1x') }}</td>
+                        <td>{{ number_format($service->service_price, 2) }} €</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+
+<<<<<<< HEAD
                 </tr>
             </thead>
             <tbody>
@@ -261,9 +362,15 @@
         <!-- Total -->
         <div class="total-section">
             <h2>{{ __('Celková cena:') }} {{ number_format($invoice->services->sum('service_price'), 2) }} €</h2>
+=======
+            <!-- Celková cena -->
+            <div class="total-section">
+                <h2>{{ __('Celková cena:') }} {{ number_format($invoice->services->sum('service_price'), 2) }} €</h2>
+            </div>
+>>>>>>> 90160b74138d910821878acc61c9f26cbfb52224
         </div>
 
-        <!-- Signature Section -->
+        <!-- Sekcia s podpisom -->
         <div class="signature-section">
             <div class="signature-left">
                 <p>{{ __('Vyhotovil:') }} <strong>{{ $user->name }}</strong></p>
@@ -275,9 +382,9 @@
             </div>
         </div>
 
-        <!-- Footer -->
+        <!-- Pätička -->
         <div class="footer">
-            <p>&copy; 2024 {{ $invoice->company->name }}. {{ __('Všetky práva vyhradené.') }}</p>
+            <p>&copy; {{ date('Y') }} {{ $invoice->company->name }}. {{ __('Všetky práva vyhradené.') }}</p>
         </div>
     </div>
 </body>

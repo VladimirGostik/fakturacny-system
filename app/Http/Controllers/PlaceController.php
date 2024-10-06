@@ -37,6 +37,7 @@ class PlaceController extends Controller
     {
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
+            'company_id' => 'required|exists:companies,id',
             'residential_company_id' => 'required|exists:residential_companies,id',
             'header' => 'nullable|string',
             'desc_above_service' => 'nullable|string|max:255',
@@ -71,6 +72,8 @@ class PlaceController extends Controller
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'header' => 'nullable|string',
+            'company_id' => 'required|exists:companies,id',
+            'residential_company_id' => 'required|exists:residential_companies,id',
             'desc_above_service' => 'nullable|string|max:255',
             'residential_company_address' => 'nullable|string|max:255',
             'residential_company_city' => 'nullable|string|max:255',
